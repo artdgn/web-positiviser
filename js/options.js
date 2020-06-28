@@ -14,12 +14,12 @@ function saveOptions() {
 
 function getOptions(callback) {
   chrome.storage.sync.get({
-    filter: 'mild',
-    trumps: 0,
+    filter: 'covid',
+    marked: 0,
     pages: 0
   }, function(items) {
     document.getElementById('selectedFilter').value = items.filter;
-    document.getElementById('trumpcount').textContent = items.trumps;
+    document.getElementById('markedcount').textContent = items.marked;
     document.getElementById('pagecount').textContent = items.pages;
     callback(items.filter);
     return items.filter;

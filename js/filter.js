@@ -1,62 +1,49 @@
-/*
- * Trump Filter - Content Script
- *
- * This is the primary JS file that manages the detection and filtration of Donald Trump from the web page.
- */
-
 // Variables
-var regex = /Trump/i;
-var search = regex.exec(document.body.innerText);
+//var regex = /Covid/i;
+//var search = regex.exec(document.body.innerText);
 
-var selector = ":contains('Trump'), :contains('TRUMP'), :contains('trump')";
+// case insensitive contains
+jQuery.expr[":"].icontains = jQuery.expr.createPseudo(function(arg) {
+    return function( elem ) {
+        return jQuery(elem).text().toLowerCase().indexOf(arg.toLowerCase()) >= 0;
+    };
+});
 
 
-// Functions
-function filterMild() {
-	console.log("Filtering Trump with Mild filter...");
-	return $(selector).filter("h1,h2,h3,h4,h5,p,span,li");
-}
+var trump_selector = ":icontains('trump')";
 
-function filterDefault () {
-	console.log("Filtering Trump with Default filter...");
-	return $(selector).filter(":only-child").closest('div');
-}
+var covid_selector = ":icontains('covid'), :icontains('pandemic'), \
+                     :icontains('cases'), :icontains('corona')";
 
-function filterVindictive() {
-	console.log("Filtering Trump with Vindictive filter...");
-	return $(selector).filter(":not('body'):not('html')");
-}
 
-function getElements(filter) {
-   if (filter == "mild") {
-	   return filterMild();
-   } else if (filter == "vindictive") {
-	   return filterVindictive();
-   } else if (filter == "aggro") {
-	   return filterDefault();
+function markElements(filter) {
+   var selector = ""
+   var color = ""
+   if (filter == "covid") {
+	   selector = covid_selector
+	   color = "red"
+   } else if (filter == "trump") {
+	   selector = trump_selector
+	   color = "orange"
    } else {
-     return filterMild();
+       // nothing
    }
+   elements = $(selector).filter("h1,h2,h3,h4,h5,p,span,li");
+   elements.css('background-color', color);
+   return elements
 }
 
-function filterElements(elements) {
-	console.log("Elements to filter: ", elements);
-	elements.fadeOut("fast");
-}
-
-
-// Implementation
-if (search) {
-   console.log("Donald Trump found on page! - Searching for elements...");
+//if (search) {
    chrome.storage.sync.get({
-     filter: 'aggro',
+     filter: 'covid',
    }, function(items) {
-	   console.log("Filter setting stored is: " + items.filter);
-	   elements = getElements(items.filter);
-	   filterElements(elements);
-	   chrome.runtime.sendMessage({method: "saveStats", trumps: elements.length}, function(response) {
-			  console.log("Logging " + elements.length + " trumps.");
+       console.log("Filter setting stored is: " + items.filter);
+	   elements = markElements(items.filter);
+	   chrome.runtime.sendMessage(
+            {method: "saveStats", marked: elements.length},
+	        function(response) {
+			      console.log("Logging " + elements.length + " marked.");
 		 });
 	 });
   chrome.runtime.sendMessage({}, function(response) {});
-}
+//}
