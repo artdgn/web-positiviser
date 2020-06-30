@@ -1,12 +1,12 @@
 {
   "manifest_version": 2,
-  "name": "Bad News Filter",
+  "name": "Bad News Fader",
   "version": "0.1.0",
-  "description": "Bad News Filter",
+  "description": "Bad News Fader",
   "page_action" :
   {
     "default_icon" : "images/icon.png",
-    "default_title" : "Bad News Filter"
+    "default_title" : "Bad News Fader"
   },
   "permissions": [
     "storage"

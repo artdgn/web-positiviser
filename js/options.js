@@ -14,13 +14,9 @@ function saveOptions() {
 
 function getOptions(callback) {
   chrome.storage.sync.get({
-    filter: 'covid',
-    marked: 0,
-    pages: 0
+    filter: 'default',
   }, function(items) {
     document.getElementById('selectedFilter').value = items.filter;
-    document.getElementById('markedcount').textContent = items.marked;
-    document.getElementById('pagecount').textContent = items.pages;
     callback(items.filter);
     return items.filter;
   });
