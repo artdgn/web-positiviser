@@ -4,7 +4,10 @@ function findElements() {
 
 
 function qualifyElement(index, element) {
-    return this.innerText.length > 10;
+    text = $(this).text();
+    word_matches = text.match(/[\S]{3,}/g);
+    n_words = word_matches ? word_matches.length : 0;
+    return n_words >= 3;
 }
 
 
