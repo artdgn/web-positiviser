@@ -1,10 +1,10 @@
 ## Bad News Fader:
-POC for a browser extension to alter negative items on page (e.g. via sentiment analysis)
+Sentiment analysis to reduce bad news visibility.
 
 ### Local development 
 
 #### Python inference server:
-- Install locally: `make install`
+- Install in local virtual environment: `make install`
 - Run server: `make server`
 
 #### Browser extension (Chrome for now):
@@ -18,4 +18,4 @@ POC for a browser extension to alter negative items on page (e.g. via sentiment 
    
 
 ### Credits:
-- Initial code for browser extension functionality taken from https://github.com/RobSpectre/Trump-Filter
+- Initial code for browser extension functionality copied from https://github.com/RobSpectre/Trump-Filter

@@ -10,7 +10,7 @@ PORT=8000
 
 requirements: .venv
 	$(VENV_ACTIVATE); \
-	pip install -U pip;\
+	pip install -U pip; \
 	pip install -U pip-tools; \
 	pip-compile requirements.in
 
@@ -28,17 +28,6 @@ server:
 build-docker:
 	docker build -t $(DOCKER_TAG) .
 
-push-docker: build-docker
-	docker push $(DOCKER_TAG)
-
-docker-bash: build-docker
-	docker run --rm -it \
-	$(DOCKER_DATA_ARG) \
-	$(DOCKER_TIME_ARG) \
-	-p $(PORT):$(PORT) \
-	--name $(REPO_NAME) \
-	$(DOCKER_TAG) bash
-
 docker-server: build-docker
 	docker run -dit \
 	$(DOCKER_DATA_ARG) \
@@ -46,7 +35,4 @@ docker-server: build-docker
 	--name $(REPO_NAME) \
 	-p $(PORT):$(PORT) \
 	--restart unless-stopped \
-	$(DOCKER_TAG) python server.py
-
-docker-server-logs:
-	docker logs $(REPO_NAME) -f
+	$(DOCKER_TAG)

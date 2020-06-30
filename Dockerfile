@@ -10,3 +10,5 @@ ENV APP_DIR=/app
 ADD . ${APP_DIR}
 
 WORKDIR ${APP_DIR}
+
+CMD ["gunicorn", "backend.api:app", "-k", "uvicorn.workers.UvicornWorker"]
