@@ -1,10 +1,17 @@
+import logging
 import re
 from typing import List
 
-import uvicorn
+import pandas as pd
 import pydantic
 import fastapi
 from fastapi.middleware import cors
+
+from backend.utils import common
+
+common.pandas_options()
+
+logger = logging.getLogger(__name__)
 
 app = fastapi.FastAPI()
 
@@ -16,6 +23,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # needed for post method
 class RequestData(pydantic.BaseModel):
@@ -33,9 +41,9 @@ def sentiment_dumb(data: RequestData):
         n_words = len(re.findall(words_re, text))
         return (min(n_negs, 2) + n_negs / n_words) / 3
 
-    return [neg_value(t) for t in data.texts]
+    values = [neg_value(t) for t in data.texts]
 
+    values_df = pd.DataFrame({'values': values, 'texts': data.texts})
+    logger.info(f"texts and values:\n{values_df.to_markdown(floatfmt='.3f')}")
 
-if __name__ == "__main__":
-    # for debugging
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    return values
