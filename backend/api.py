@@ -1,3 +1,4 @@
+import re
 from typing import List
 
 import uvicorn
@@ -22,8 +23,17 @@ class RequestData(pydantic.BaseModel):
 
 
 @app.post("/sentiment/")
-def sentiment_stub(data: RequestData):
-    return [min(1, len(t) / 144) for t in data.texts]
+def sentiment_dumb(data: RequestData):
+    words_re = r'\w+'
+    neg_re = r'trump|covid|corona|pandemic|virus|cases|death'
+
+    def neg_value(text):
+        text = text.lower()
+        n_negs = len(re.findall(neg_re, text))
+        n_words = len(re.findall(words_re, text))
+        return (min(n_negs, 2) + n_negs / n_words) / 3
+
+    return [neg_value(t) for t in data.texts]
 
 
 if __name__ == "__main__":
