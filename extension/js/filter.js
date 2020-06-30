@@ -2,31 +2,38 @@ function findElements() {
     return $("h1,h2,h3,h4,h5,p,span,li,a").filter(qualifyElement);
 }
 
+
 function qualifyElement(index, element) {
     return this.innerText.length > 10;
 }
+
 
 function collectTexts(elements) {
     texts = [];
     elements.each(function (index) {
         texts[index] = $(this).text();
     })
-    console.log("texts: " + texts)
+//    console.log("texts: " + texts)
     return texts;
 }
 
-function textValues(texts) {
-    return backEndStub(texts);
+
+function markByBackend(elements) {
+    texts = collectTexts(elements);
+    $.ajax({
+        type: 'post',
+        url: 'http://localhost:8000/sentiment/',
+        data: JSON.stringify({'texts': texts}),
+        success: function(values, status) {
+//            console.log("values: " + values)
+            markByValues(elements, values)
+        },
+        error: function(xhr, status, error) {
+          alert(xhr.responseText);
+        }
+    });
 }
 
-function backEndStub(texts) {
-    neg_values = [];
-    texts.forEach(function(t, i) {
-        neg_values[i] = t.length / 144;
-    });
-    console.log("values: " + neg_values)
-    return neg_values;
-}
 
 function markByValues(elements, neg_values) {
     elements.each(function (index) {
@@ -37,13 +44,12 @@ function markByValues(elements, neg_values) {
     });
 }
 
+
 chrome.storage.sync.get({
  filter: 'default',
 }, function(items) {
    console.log("Filter setting stored is: " + items.filter);
    elements = findElements();
-   texts = collectTexts(elements);
-   values = textValues(texts);
-   markByValues(elements, values)
+   markByBackend(elements)
  });
 chrome.runtime.sendMessage({}, function(response) {});
