@@ -4,22 +4,74 @@
 #
 #    pip-compile requirements.in
 #
-click==7.1.2              # via uvicorn
-dataclasses==0.7          # via pydantic
+attrs==19.3.0             # via pytest
+boto3==1.14.14            # via smart-open
+boto==2.49.0              # via smart-open
+botocore==1.17.14         # via boto3, s3transfer
+bpemb==0.3.0              # via flair
+certifi==2020.6.20        # via requests
+chardet==3.0.4            # via requests
+click==7.1.2              # via sacremoses, uvicorn
+cloudpickle==1.4.1        # via hyperopt
+cycler==0.10.0            # via matplotlib
+dataclasses==0.7          # via pydantic, transformers
+decorator==4.4.2          # via networkx
+deprecated==1.2.10        # via flair
+docutils==0.15.2          # via botocore
 fastapi==0.58.1           # via -r requirements.in
+filelock==3.0.12          # via transformers
+flair==0.5                # via -r requirements.in
+future==0.18.2            # via hyperopt, torch
+gensim==3.8.3             # via bpemb, flair
 gunicorn==20.0.4          # via -r requirements.in
 h11==0.9.0                # via uvicorn
 httptools==0.1.1          # via uvicorn
-numpy==1.19.0             # via -r requirements.in, pandas
+hyperopt==0.2.4           # via flair
+idna==2.10                # via requests
+importlib-metadata==1.7.0  # via pluggy, pytest
+jmespath==0.10.0          # via boto3, botocore
+joblib==0.15.1            # via sacremoses, scikit-learn
+kiwisolver==1.2.0         # via matplotlib
+langdetect==1.0.8         # via flair
+matplotlib==3.2.2         # via flair
+more-itertools==8.4.0     # via pytest
+mpld3==0.3                # via flair
+networkx==2.4             # via hyperopt
+numpy==1.19.0             # via -r requirements.in, bpemb, gensim, hyperopt, matplotlib, pandas, scikit-learn, scipy, torch, transformers
+packaging==20.4           # via pytest, transformers
 pandas==1.0.5             # via -r requirements.in
+pluggy==0.13.1            # via pytest
+py==1.9.0                 # via pytest
 pydantic==1.5.1           # via fastapi
-python-dateutil==2.8.1    # via pandas
+pyparsing==2.4.7          # via matplotlib, packaging
+pytest==5.4.3             # via flair
+python-dateutil==2.8.1    # via botocore, flair, matplotlib, pandas
 pytz==2020.1              # via pandas
-six==1.15.0               # via python-dateutil
+regex==2020.6.8           # via flair, sacremoses, segtok, transformers
+requests==2.24.0          # via bpemb, smart-open, transformers
+s3transfer==0.3.3         # via boto3
+sacremoses==0.0.43        # via transformers
+scikit-learn==0.23.1      # via flair
+scipy==1.5.0              # via gensim, hyperopt, scikit-learn
+segtok==1.5.10            # via flair
+sentencepiece==0.1.91     # via bpemb, transformers
+six==1.15.0               # via cycler, gensim, hyperopt, langdetect, packaging, python-dateutil, sacremoses
+smart-open==2.0.0         # via gensim
+sqlitedict==1.6.0         # via flair
 starlette==0.13.4         # via fastapi
+tabulate==0.8.7           # via -r requirements.in, flair
+threadpoolctl==2.1.0      # via scikit-learn
+tokenizers==0.7.0         # via transformers
+torch==1.5.1              # via flair
+tqdm==4.47.0              # via bpemb, flair, hyperopt, sacremoses, transformers
+transformers==2.11.0      # via -r requirements.in, flair
+urllib3==1.25.9           # via botocore, requests
 uvicorn==0.11.5           # via -r requirements.in
 uvloop==0.14.0            # via uvicorn
+wcwidth==0.2.5            # via pytest
 websockets==8.1           # via uvicorn
+wrapt==1.12.1             # via deprecated
+zipp==3.1.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
