@@ -39,9 +39,21 @@ function markByBackend(elements) {
 
 
 function markByValues(elements, neg_values) {
+    neg_threshold = 0.9;
+    pos_threshold = 0.1;
     elements.each(function (index) {
-        var color_val = Math.round(255 * neg_values[index]);
-        var color = `rgb(255, ${255 - color_val}, ${255 - color_val})`;
+        neg_score = neg_values[index];
+        if (neg_score >= neg_threshold) {
+            norm_score = (neg_score - neg_threshold) / (1 - neg_threshold);
+            color_val = Math.round(255 * norm_score);
+            color = `rgb(255, ${255 - color_val}, ${255 - color_val})`;
+        } else if (neg_score < pos_threshold) {
+            norm_score = (pos_threshold - neg_score) / (1 - pos_threshold);
+            color_val = Math.round(255 * norm_score);
+            color = `rgb(${255 - color_val}, 255, ${255 - color_val})`;
+        } else {
+            return;
+        }
         $(this).css('background-color', color);
 //        $(this).css('opacity', color_val);
     });

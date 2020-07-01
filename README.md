@@ -5,7 +5,7 @@ Sentiment analysis to reduce bad news visibility.
 
 #### Python inference server:
 - Install in local virtual environment: `make install`
-- Run server: `make server`
+- Run server: `make server` (first run will take time to download the model)
 
 #### Browser extension (Chrome for now):
 - Install (Chrome):
