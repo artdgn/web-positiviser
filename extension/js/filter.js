@@ -3,11 +3,21 @@ function findElements() {
 }
 
 
+$.fn.immediateText = function() {
+    return this.contents().not(this.children()).text();
+};
+
+
 function qualifyElement(index, element) {
-    text = $(this).text();
+    text = $(this).immediateText();
+
+    // words number
     word_matches = text.match(/[\S]{3,}/g);
     n_words = word_matches ? word_matches.length : 0;
-    return n_words >= 3;
+    // has html
+    html_tag_matches = text.match(/<|>/g);
+
+    return (n_words >= 3) & (html_tag_matches == null);
 }
 
 
@@ -16,7 +26,6 @@ function collectTexts(elements) {
     elements.each(function (index) {
         texts[index] = $(this).text();
     })
-//    console.log("texts: " + texts)
     return texts;
 }
 
@@ -39,23 +48,32 @@ function markByBackend(elements) {
 
 
 function markByValues(elements, neg_values) {
-    neg_threshold = 0.9;
-    pos_threshold = 0.1;
+    neg_threshold = 0.85;
+    pos_threshold = 0.35;
+    min_opacity = 0.4
     elements.each(function (index) {
         neg_score = neg_values[index];
+
+        // opacity
+        if (neg_score >= neg_threshold) {
+            norm_score = (neg_score - neg_threshold) / (1 - neg_threshold);
+            opacity = 1 - norm_score * (1 - min_opacity);
+            $(this).css('opacity', opacity);
+        }
+
+        // color
         if (neg_score >= neg_threshold) {
             norm_score = (neg_score - neg_threshold) / (1 - neg_threshold);
             color_val = Math.round(255 * norm_score);
-            color = `rgb(255, ${255 - color_val}, ${255 - color_val})`;
+            $(this).css('background-color',
+                        `rgba(255, ${255 - color_val}, ${255 - color_val})`);
         } else if (neg_score < pos_threshold) {
-            norm_score = (pos_threshold - neg_score) / (1 - pos_threshold);
+            norm_score = (pos_threshold - neg_score) / pos_threshold;
             color_val = Math.round(255 * norm_score);
-            color = `rgb(${255 - color_val}, 255, ${255 - color_val})`;
-        } else {
-            return;
+            $(this).css('background-color',
+                        `rgb(${255 - color_val}, 255, ${255 - color_val})`);
         }
-        $(this).css('background-color', color);
-//        $(this).css('opacity', color_val);
+
     });
 }
 

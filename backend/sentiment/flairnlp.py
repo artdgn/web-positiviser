@@ -52,6 +52,6 @@ class _TransfomerModel(_RNNModel):
 
 
 model = _RNNModel()
-# model = _SentimentModelTransfomer()
+# model = _TransfomerModel()
 
 model.load()
