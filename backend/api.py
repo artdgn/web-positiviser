@@ -34,7 +34,8 @@ class RequestData(pydantic.BaseModel):
 def sentiment_flair(data: RequestData):
     values = flairnlp.model.negativity_scores(data.texts)
 
-    values_df = pd.DataFrame({'values': values, 'texts': data.texts})
+    values_df = pd.DataFrame({'values': values, 'texts': data.texts}
+                             ).sort_values('values')
     logger.info(f"texts and values:\n{values_df.to_markdown(floatfmt='.3f')}")
 
     return values
