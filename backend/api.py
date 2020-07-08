@@ -7,7 +7,7 @@ import fastapi
 from fastapi.middleware import cors
 
 from backend.utils import common
-from backend.sentiment import flairnlp
+from backend.sentiment import flairnlp, domain_vocab
 
 common.pandas_options()
 
@@ -32,7 +32,8 @@ class RequestData(pydantic.BaseModel):
 
 @app.post("/sentiment/")
 def sentiment_flair(data: RequestData):
-    scores, filtered_texts = flairnlp.model.negativity_scores(data.texts)
+    replaced_vocab_texts = domain_vocab.substitute_words(data.texts)
+    scores, filtered_texts = flairnlp.model.negativity_scores(replaced_vocab_texts)
 
     values_df = pd.DataFrame(
         {'score': scores, 'text': data.texts, 'filtered_text': filtered_texts}

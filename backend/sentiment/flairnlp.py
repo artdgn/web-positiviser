@@ -4,8 +4,14 @@ import shutil
 from typing import List
 
 import flair
+import segtok.tokenizer
 
 from backend.utils import common
+
+
+def _tokenizer(text):
+    return segtok.tokenizer.symbol_tokenizer(
+        ' '.join(flair.data.word_tokenizer(text)))
 
 
 class _RNNModel:
@@ -13,6 +19,7 @@ class _RNNModel:
 
     _model: flair.models.TextClassifier = None
     _vocab = set()
+    _max_pred_tokens = 20
 
     @property
     def _model_path(self):
@@ -43,9 +50,15 @@ class _RNNModel:
         else:
             return 0.5 - 0.5 * sentence.labels[0].score
 
+    def _texts_prep(self, str_list: List[str]) -> List[flair.data.Sentence]:
+        sents = [flair.data.Sentence(s, use_tokenizer=_tokenizer)
+                 for s in str_list]
+        self._sanitize_oov(sents)
+        self._truncate_long_texts(sents)
+        return sents
+
     def negativity_scores(self, str_list: List[str]):
-        sents = [flair.data.Sentence(s, use_tokenizer=True) for s in str_list]
-        self.sanitize_oov(sents)
+        sents = self._texts_prep(str_list)
         self.model.predict(sents, mini_batch_size=1024, verbose=True)
         scores = [self._negativity_score(s) for s in sents]
         texts = [s.to_plain_string() for s in sents]
@@ -72,9 +85,13 @@ class _RNNModel:
             self._load_vocab()
         return self._vocab
 
-    def sanitize_oov(self, sentences: List[flair.data.Sentence]):
+    def _sanitize_oov(self, sentences: List[flair.data.Sentence]):
         for sent in sentences:
             sent.tokens = [t for t in sent.tokens if t.text in model.vocab]
+
+    def _truncate_long_texts(self, sentences: List[flair.data.Sentence]):
+        for sent in sentences:
+            sent.tokens = sent.tokens[:self._max_pred_tokens]
 
 
 class _TransfomerModel(_RNNModel):
@@ -84,7 +101,7 @@ class _TransfomerModel(_RNNModel):
         return list(self.model.document_embeddings.tokenizer.vocab.keys())
 
 
-model = _RNNModel()
-# model = _TransfomerModel()
+# model = _RNNModel()
+model = _TransfomerModel()
 
 model.load()
