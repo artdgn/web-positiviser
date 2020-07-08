@@ -32,11 +32,13 @@ class RequestData(pydantic.BaseModel):
 
 @app.post("/sentiment/")
 def sentiment_flair(data: RequestData):
-    values = flairnlp.model.negativity_scores(data.texts)
+    scores, filtered_texts = flairnlp.model.negativity_scores(data.texts)
 
-    values_df = pd.DataFrame({'values': values, 'texts': data.texts}
-                             ).sort_values('values')
-    logger.info(f"texts and values:\n{values_df.to_markdown(floatfmt='.3f')}")
+    values_df = pd.DataFrame(
+        {'score': scores, 'text': data.texts, 'filtered_text': filtered_texts}
+    ).sort_values('score')
 
-    return values
+    logger.info(f"scores and texts:\n{values_df.to_markdown(floatfmt='.3f')}")
+
+    return scores
 
