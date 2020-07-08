@@ -14,10 +14,8 @@ function qualifyElement(index, element) {
     // words number
     word_matches = text.match(/[\S]{3,}/g);
     n_words = word_matches ? word_matches.length : 0;
-    // has html
-    html_tag_matches = text.match(/<|>/g);
 
-    return (n_words >= 3) & (html_tag_matches == null);
+    return (n_words >= 3);
 }
 
 
