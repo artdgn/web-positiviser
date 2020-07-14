@@ -3,10 +3,11 @@
   "name": "Bad News Fader",
   "version": "0.1.0",
   "description": "Bad News Fader",
-  "page_action" :
+  "browser_action" :
   {
     "default_icon" : "images/icon.png",
-    "default_title" : "Bad News Fader"
+    "default_title" : "Bad News Fader",
+    "default_popup": "popup.html"
   },
   "permissions": [
     "storage"
@@ -23,12 +24,7 @@
     }
   ],
   "background": {
-    "persistent": false,
-    "page": "background.html"
-  },
-  "options_ui" : {
-    "chrome_style": true,
-    "page": "options.html"
+    "scripts": ["js/background.js"]
   },
   "content_security_policy": "script-src 'self'; object-src 'self'"
 }

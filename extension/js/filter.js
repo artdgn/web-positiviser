@@ -28,15 +28,14 @@ function collectTexts(elements) {
 }
 
 
-function markByBackend(elements) {
+function markByBackend(elements, styling) {
     texts = collectTexts(elements);
     $.ajax({
         type: 'post',
         url: 'http://localhost:8000/sentiment/',
         data: JSON.stringify({'texts': texts}),
         success: function(values, status) {
-//            console.log("values: " + values)
-            markByValues(elements, values)
+            markByValues(elements, values, styling)
         },
         error: function(xhr, status, error) {
           alert(xhr.responseText);
@@ -44,8 +43,17 @@ function markByBackend(elements) {
     });
 }
 
+// random marks to simluate a backend without running one
+function markByRandom(elements, styling) {
+    values = [];
+    elements.each(function (index) {
+        values[index] = Math.random();
+    });
+    markByValues(elements, values, styling);
+}
 
-function markByValues(elements, neg_values) {
+
+function markByValues(elements, neg_values, styling) {
     neg_threshold = 0.85;
     pos_threshold = 0.35;
     min_opacity = 0.4
@@ -60,16 +68,18 @@ function markByValues(elements, neg_values) {
         }
 
         // color
-        if (neg_score >= neg_threshold) {
-            norm_score = (neg_score - neg_threshold) / (1 - neg_threshold);
-            color_val = Math.round(255 * norm_score);
-            $(this).css('background-color',
-                        `rgba(255, ${255 - color_val}, ${255 - color_val})`);
-        } else if (neg_score < pos_threshold) {
-            norm_score = (pos_threshold - neg_score) / pos_threshold;
-            color_val = Math.round(255 * norm_score);
-            $(this).css('background-color',
-                        `rgb(${255 - color_val}, 255, ${255 - color_val})`);
+        if (styling != "nocolors") {
+            if (neg_score >= neg_threshold) {
+                norm_score = (neg_score - neg_threshold) / (1 - neg_threshold);
+                color_val = Math.round(255 * norm_score);
+                $(this).css('background-color',
+                            `rgba(255, ${255 - color_val}, ${255 - color_val})`);
+            } else if (neg_score < pos_threshold) {
+                norm_score = (pos_threshold - neg_score) / pos_threshold;
+                color_val = Math.round(255 * norm_score);
+                $(this).css('background-color',
+                            `rgb(${255 - color_val}, 255, ${255 - color_val})`);
+            }
         }
 
     });
@@ -77,10 +87,11 @@ function markByValues(elements, neg_values) {
 
 
 chrome.storage.sync.get({
- filter: 'default',
-}, function(items) {
-   console.log("Filter setting stored is: " + items.filter);
+ styling: 'default',
+}, function(stored) {
+   console.log("Styling setting stored is: " + stored.styling);
    elements = findElements();
-   markByBackend(elements)
+   markByBackend(elements, stored.styling)
+//   markByRandom(elements, stored.styling)
  });
 chrome.runtime.sendMessage({}, function(response) {});

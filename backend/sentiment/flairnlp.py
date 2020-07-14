@@ -87,7 +87,7 @@ class _RNNModel:
 
     def _sanitize_oov(self, sentences: List[flair.data.Sentence]):
         for sent in sentences:
-            sent.tokens = [t for t in sent.tokens if t.text in model.vocab]
+            sent.tokens = [t for t in sent.tokens if t.text in self.vocab]
 
     def _truncate_long_texts(self, sentences: List[flair.data.Sentence]):
         for sent in sentences:
