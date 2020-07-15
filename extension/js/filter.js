@@ -69,16 +69,22 @@ function randomValuesBackend(elements) {
 
 
 function markByValues(elements, neg_values) {
-    neg_threshold = 0.85;
-    pos_threshold = 0.35;
-    min_opacity = 0.4
+    neg_margin = 0.0;
+    pos_margin = 0.0;
+    min_opacity = 0.3
 
     chrome.storage.sync.get({
        styling: 'default',
+       balance: 50,
     }, function(stored) {
        console.log("stored styling setting: " + stored.styling);
+       console.log("stored balance setting: " + stored.balance);
 
        styling = stored.styling;
+
+       threshold = stored.balance / 100;
+       neg_threshold = Math.min(threshold + neg_margin, 1.0);
+       pos_threshold = Math.max(threshold - pos_margin, 0.0);
 
        elements.each(function (index) {
            neg_score = neg_values[index];

@@ -1,34 +1,36 @@
 function saveOptions() {
-  var selectedStyling = document.getElementById('selectedStyling').value;
-  var selectedBackend = document.getElementById('selectedBackend').value;
-
-  chrome.storage.sync.set({
-    styling: selectedStyling,
-    backend: selectedBackend
-  }, function() {
-    console.log('Styling:' + selectedStyling);
-    console.log('Backend:' + selectedBackend);
+  options = {
+    styling: document.getElementById('selectedStyling').value,
+    backend: document.getElementById('selectedBackend').value,
+    balance: document.getElementById('balanceAdjustment').value
+  };
+  chrome.storage.sync.set(options, function() {
+    console.log(options);
   });
 }
+
+function setFromStored(stored) {
+    document.getElementById('selectedStyling').value = stored.styling;
+    document.getElementById('selectedBackend').value = stored.backend;
+    document.getElementById('balanceAdjustment').value = stored.balance;
+}
+
 
 function getOptions(callback) {
   chrome.storage.sync.get({
     styling: 'default',
-    backend: 'default'
+    backend: 'default',
+    balance: 50
   }, function(stored) {
-    document.getElementById('selectedStyling').value = stored.styling;
-    document.getElementById('selectedBackend').value = stored.backend;
     callback(stored);
   });
 }
 
 function restoreOptions() {
-  getOptions(function(stored) {
-    document.getElementById('selectedStyling').value = stored.styling;
-    document.getElementById('selectedBackend').value = stored.backend;
-  });
-  document.getElementById('selectedStyling').addEventListener('change', saveOptions);
-  document.getElementById('selectedBackend').addEventListener('change', saveOptions);
+  getOptions(setFromStored);
+  for (element of document.getElementsByClassName('storedOptions')) {
+    element.addEventListener('change', saveOptions);
+  };
 }
 
 document.addEventListener('DOMContentLoaded', restoreOptions);

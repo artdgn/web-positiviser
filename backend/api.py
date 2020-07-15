@@ -33,7 +33,7 @@ class RequestData(pydantic.BaseModel):
 @app.post("/sentiment/")
 def sentiment_flair(data: RequestData):
     replaced_vocab_texts = domain_vocab.substitute_words(data.texts)
-    scores, filtered_texts = flairnlp.model.negativity_scores(replaced_vocab_texts)
+    scores, filtered_texts = flairnlp.model.negativity_scores(tuple(replaced_vocab_texts))
 
     values_df = pd.DataFrame(
         {'score': scores, 'text': data.texts, 'filtered_text': filtered_texts}

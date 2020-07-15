@@ -1,7 +1,8 @@
 import os
 import re
 import shutil
-from typing import List
+import functools
+from typing import List, Tuple, Iterable
 
 import flair
 import segtok.tokenizer
@@ -50,14 +51,15 @@ class _RNNModel:
         else:
             return 0.5 - 0.5 * sentence.labels[0].score
 
-    def _texts_prep(self, str_list: List[str]) -> List[flair.data.Sentence]:
+    def _texts_prep(self, str_list: Iterable[str]) -> List[flair.data.Sentence]:
         sents = [flair.data.Sentence(s, use_tokenizer=_tokenizer)
                  for s in str_list]
         self._sanitize_oov(sents)
         self._truncate_long_texts(sents)
         return sents
 
-    def negativity_scores(self, str_list: List[str]):
+    @functools.lru_cache(maxsize=None)
+    def negativity_scores(self, str_list: Tuple[str]):
         sents = self._texts_prep(str_list)
         self.model.predict(sents, mini_batch_size=1024, verbose=True)
         scores = [self._negativity_score(s) for s in sents]

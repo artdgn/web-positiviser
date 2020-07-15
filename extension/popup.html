@@ -13,15 +13,20 @@ Allows user to adjust filtration settings.
 		</div>
     <div id="options">
 		<label for="selectedStyling">Styling</label>
-		<select id="selectedStyling">
+		<select id="selectedStyling" class="storedOptions">
 			<option value="default">default</option>
 			<option value="nocolors">no colors</option>
 		</select>
+
 		<label for="selectedBackend">Backend</label>
-		<select id="selectedBackend">
+		<select id="selectedBackend" class="storedOptions">
 			<option value="default">default</option>
 			<option value="random">random</option>
 		</select>
+
+		<label for="balanceAdjustment">Balance adjustment</label>
+	    <input class="slider storedOptions" id="balanceAdjustment"
+               type="range" min="1" max="100" value="50" >
 	</div>
 	<script type="text/javascript" src="js/popup.js"></script>
 </body>
