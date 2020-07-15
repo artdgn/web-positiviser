@@ -58,7 +58,7 @@ class _RNNModel:
         self._truncate_long_texts(sents)
         return sents
 
-    @functools.lru_cache(maxsize=None)
+    @functools.lru_cache(maxsize=1000)
     def negativity_scores(self, str_list: Tuple[str]):
         sents = self._texts_prep(str_list)
         self.model.predict(sents, mini_batch_size=1024, verbose=True)

@@ -15,18 +15,21 @@ Allows user to adjust filtration settings.
 		<label for="selectedStyling">Styling</label>
 		<select id="selectedStyling" class="storedOptions">
 			<option value="default">default</option>
-			<option value="nocolors">no colors</option>
+			<option value="with_color">with colors</option>
 		</select>
 
 		<label for="selectedBackend">Backend</label>
 		<select id="selectedBackend" class="storedOptions">
 			<option value="default">default</option>
-			<option value="random">random</option>
+			<option value="simple">simple</option>
 		</select>
 
-		<label for="balanceAdjustment">Balance adjustment</label>
-	    <input class="slider storedOptions" id="balanceAdjustment"
-               type="range" min="1" max="100" value="50" >
+		<label for="selectedThreshold">Positivity threshold</label>
+	    <input class="slider storedOptions" id="selectedThreshold"
+               type="range" min="0" max="100" value="50" >
+
+		<label for="selectedRankingCheck">Ranks instead of values</label>
+		<input class="storedOptions" type="checkbox" id="selectedRankingCheck">
 	</div>
 	<script type="text/javascript" src="js/popup.js"></script>
 </body>

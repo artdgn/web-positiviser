@@ -37,9 +37,11 @@ def sentiment_flair(data: RequestData):
 
     values_df = pd.DataFrame(
         {'score': scores, 'text': data.texts, 'filtered_text': filtered_texts}
-    ).sort_values('score')
+    )
 
-    logger.info(f"scores and texts:\n{values_df.to_markdown(floatfmt='.3f')}")
+    md_table = values_df.sort_values('score').to_markdown(floatfmt='.3f')
+    logger.info(f"scores and texts:\n{md_table}")
 
-    return scores
+    return {'values': values_df['score'].to_list(),
+            'ranks': values_df['score'].rank(method='first').to_list()}
 

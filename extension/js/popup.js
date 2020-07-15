@@ -2,7 +2,8 @@ function saveOptions() {
   options = {
     styling: document.getElementById('selectedStyling').value,
     backend: document.getElementById('selectedBackend').value,
-    balance: document.getElementById('balanceAdjustment').value
+    threshold: document.getElementById('selectedThreshold').value,
+    ranking: document.getElementById('selectedRankingCheck').checked
   };
   chrome.storage.sync.set(options, function() {
     console.log(options);
@@ -12,7 +13,8 @@ function saveOptions() {
 function setFromStored(stored) {
     document.getElementById('selectedStyling').value = stored.styling;
     document.getElementById('selectedBackend').value = stored.backend;
-    document.getElementById('balanceAdjustment').value = stored.balance;
+    document.getElementById('selectedThreshold').value = stored.threshold;
+    document.getElementById('selectedRankingCheck').checked = stored.ranking;
 }
 
 
@@ -20,7 +22,8 @@ function getOptions(callback) {
   chrome.storage.sync.get({
     styling: 'default',
     backend: 'default',
-    balance: 50
+    threshold: 50,
+    ranking: false
   }, function(stored) {
     callback(stored);
   });

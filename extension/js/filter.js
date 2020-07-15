@@ -34,8 +34,8 @@ function markByBackend(elements) {
     }, function(stored) {
         backend = stored.backend;
         console.log("stored backend setting: " + backend);
-        if (backend == "random") {
-            randomValuesBackend(elements);
+        if (backend == "simple") {
+            simpleHeuristicBackend(elements);
         } else {
             pythonSentimentBackend(elements);
         };
@@ -49,8 +49,8 @@ function pythonSentimentBackend(elements) {
         type: 'post',
         url: 'http://localhost:8000/sentiment/',
         data: JSON.stringify({'texts': texts}),
-        success: function(values, status) {
-            markByValues(elements, values);
+        success: function(data, status) {
+            markByValues(elements, data.values, data.ranks);
         },
         error: function(xhr, status, error) {
             alert(xhr.responseText);
@@ -58,46 +58,71 @@ function pythonSentimentBackend(elements) {
     });
 }
 
-// random marks to simluate a backend without running one
-function randomValuesBackend(elements) {
+function simpleHeuristicBackend(elements) {
+    texts = collectTexts(elements);
     values = [];
-    elements.each(function (index) {
-        values[index] = Math.random();
+    texts.forEach(function (text, index) {
+        word_matches = text.match(/[\S]{3,}/g);
+        n_words = word_matches ? word_matches.length : 0;
+
+        if (n_words == 0) {
+            // shouldn't happen
+            value = 0;
+        } else {
+            bad_words_matches = text.match(/trump|covid|coronavirus|pandemic/ig);
+            n_bad = bad_words_matches ? bad_words_matches.length : 0;
+            value = n_bad / n_words;
+        }
+        values[index] = value;
     });
-    markByValues(elements, values);
+
+    sorted = Array.from(new Set(values)).sort(function(a,b){
+        return a-b;
+    });
+    ranks = values.map(function(v){
+        return sorted.indexOf(v)+1;
+    });
+    markByValues(elements, values, ranks);
 }
 
 
-function markByValues(elements, neg_values) {
+function markByValues(elements, neg_values, neg_ranks) {
     neg_margin = 0.0;
     pos_margin = 0.0;
-    min_opacity = 0.3
+    min_opacity = 0.1
 
     chrome.storage.sync.get({
        styling: 'default',
-       balance: 50,
+       threshold: 50,
+       ranking: false
     }, function(stored) {
        console.log("stored styling setting: " + stored.styling);
-       console.log("stored balance setting: " + stored.balance);
+       console.log("stored threshold setting: " + stored.threshold);
+       console.log("stored ranking setting: " + stored.ranking);
 
-       styling = stored.styling;
-
-       threshold = stored.balance / 100;
-       neg_threshold = Math.min(threshold + neg_margin, 1.0);
-       pos_threshold = Math.max(threshold - pos_margin, 0.0);
+       threshold = stored.threshold / 100;
+       neg_threshold = Math.min(threshold + neg_margin, 99.9);
+       pos_threshold = Math.max(threshold - pos_margin, 0.01);
+       max_rank = Math.max.apply(null, neg_ranks);
 
        elements.each(function (index) {
-           neg_score = neg_values[index];
+           if (stored.ranking) {
+               neg_score = neg_ranks[index] / max_rank;
+           } else {
+               neg_score = neg_values[index];
+           };
 
            // opacity
            if (neg_score >= neg_threshold) {
                norm_score = (neg_score - neg_threshold) / (1 - neg_threshold);
                opacity = 1 - norm_score * (1 - min_opacity);
                $(this).css('opacity', opacity);
+           } else {
+               $(this).css('opacity', 1.0);
            }
 
            // color
-           if (styling != "nocolors") {
+           if (stored.styling == "with_color") {
                if (neg_score >= neg_threshold) {
                    norm_score = (neg_score - neg_threshold) / (1 - neg_threshold);
                    color_val = Math.round(255 * norm_score);
@@ -107,7 +132,7 @@ function markByValues(elements, neg_values) {
                    norm_score = (pos_threshold - neg_score) / pos_threshold;
                    color_val = Math.round(255 * norm_score);
                    $(this).css('background-color',
-                               `rgb(${255 - color_val}, 255, ${255 - color_val})`);
+                               `rgba(${255 - color_val}, 255, ${255 - color_val}, 0.5)`);
                }
            } else {
                $(this).css('background-color', 'white');
@@ -115,7 +140,6 @@ function markByValues(elements, neg_values) {
        });
     });
 }
-
 
 elements = findElements();
 markByBackend(elements)
