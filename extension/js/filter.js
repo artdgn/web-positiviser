@@ -1,10 +1,15 @@
 function findElements() {
-    return $("h1,h2,h3,h4,h5,p,span,li,a").filter(qualifyElement);
+    return $("h1,h2,h3,h4,h5,p,span,li,a,img").filter(qualifyElement);
 }
 
-
 $.fn.immediateText = function() {
-    return this.contents().not(this.children()).text();
+    text = this.contents().not(this.children()).text();
+
+    // handle img tags
+    alt_text = $(this).attr("alt");
+    text = (alt_text != null) ? text + ' ' + alt_text : text;
+
+    return text;
 };
 
 function qualifyElement(index, element) {
@@ -20,7 +25,7 @@ function qualifyElement(index, element) {
 function collectTexts(elements) {
     texts = [];
     elements.each(function (index) {
-        texts[index] = $(this).text();
+        texts[index] = $(this).immediateText();
     })
     return texts;
 }
