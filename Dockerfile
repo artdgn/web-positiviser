@@ -11,4 +11,5 @@ ADD . ${APP_DIR}
 
 WORKDIR ${APP_DIR}
 
-CMD ["gunicorn", "backend.api:app", "-k", "uvicorn.workers.UvicornWorker"]
+CMD python server.py
+# CMD gunicorn backend.api:app -b 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker

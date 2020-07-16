@@ -1,4 +1,4 @@
-REPO_NAME=bad-news-fader
+REPO_NAME=negativity-balancer
 VENV_ACTIVATE=. .venv/bin/activate
 PYTHON=.venv/bin/python
 DOCKER_TAG=artdgn/$(REPO_NAME)
@@ -29,10 +29,24 @@ build-docker:
 	docker build -t $(DOCKER_TAG) .
 
 docker-server: build-docker
+	docker rm -f $(REPO_NAME) || sleep 1
+	docker run -it --rm \
+	$(DOCKER_DATA_ARG) \
+	--name $(REPO_NAME) \
+	-p $(PORT):$(PORT) \
+	$(DOCKER_TAG)
+
+docker-server-persist: build-docker
 	docker run -dit \
 	$(DOCKER_DATA_ARG) \
-	$(DOCKER_TIME_ARG) \
 	--name $(REPO_NAME) \
 	-p $(PORT):$(PORT) \
 	--restart unless-stopped \
 	$(DOCKER_TAG)
+
+docker-update-server:
+	docker rm -f $(REPO_NAME) || sleep 1
+	$(MAKE) docker-server-persist
+
+docker-logs:
+	docker logs $(REPO_NAME) -f

@@ -10,8 +10,8 @@ of the text in them and adjust the style to reduce their visibility.
 - This is very much a work in progress and not a ready to be used extension
 since it requires running an additional service locally for getting
 reasonable sentiment scores.
-- The negativity classification is by no means perfect, but it does 
-work to re-balance the amount of negative and positive items on different pages.
+- The negativity classification is by no means perfect (so it's no a "Negativity Blocker" yet :), 
+but it does work pretty well to re-balance the amount of negative and positive items on different pages.
   
 
 ### Running locally 
@@ -27,9 +27,16 @@ work to re-balance the amount of negative and positive items on different pages.
    
 
 
-#### Python inference server:
-- Install in local virtual environment: `make install`
-- Run server: `make server` (first run will take time to download the model)
+#### Inference server (first run will take time to download the model):
+##### Docker:
+- Create a directory to hold the model between runs: `mkdir ~/model_data`
+- `docker run -it --rm -p 8000:8000 -v ~/model_data:/app/data artdgn/negativity-balancer`
+
+##### Local python:
+- Install in local virtual environment (after cloning repo): `make install`
+- Run server: `make server` 
 
 ### Credits:
-- Initial code for browser extension functionality copied from https://github.com/RobSpectre/Trump-Filter
+- Sentiment analysis model and package: [flair NLP](https://github.com/flairNLP/flair)
+- Backend API framework: [fastapi](https://github.com/tiangolo/fastapi)
+- Initial code for browser extension functionality copied from [Trump-Filter](https://github.com/RobSpectre/Trump-Filter)
