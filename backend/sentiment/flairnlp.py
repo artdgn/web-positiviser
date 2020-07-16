@@ -1,9 +1,8 @@
-import functools
 import logging
 import os
 import re
 import shutil
-from typing import List, Tuple, Iterable
+from typing import List, Iterable
 
 import flair
 import pandas as pd
@@ -13,42 +12,48 @@ from backend import data_models
 from backend.sentiment import domain_vocab
 from backend.utils import common
 
-
 logger = logging.getLogger(__name__)
 
 cols = data_models.Cols
 
 
 def sentiment_results_dataframe(texts: Iterable[str]):
-    # TODO: refactor into a class with (caching, filtering, substituting, deduping..)
-
-    texts_filtered = [' '.join(_tokenizer(s)) for s in texts]
+    # filter texts for deduping
+    texts_filtered = [' '.join(tokenizer(s)) for s in texts]
 
     df_in = pd.DataFrame({cols.text: texts_filtered})
 
+    # dedup
     no_dups = df_in.drop_duplicates()
 
+    # replace common important OOV words
     replaced_vocab_texts = domain_vocab.substitute_words(no_dups[cols.text])
 
+    # get scores and final texts
     no_dups[cols.score], no_dups[cols.processed_text] = (
-        model.negativity_scores(tuple(replaced_vocab_texts)))
+        model.negativity_scores(replaced_vocab_texts))
 
-    logger.info(f"no dups:\n{no_dups.sort_values(cols.score).to_markdown(floatfmt='.3f')}")
+    # merge
+    df_out = pd.merge(df_in, no_dups, on='text', how='left')
 
-    return pd.merge(df_in, no_dups, on='text', how='left')
+    # log
+    md_table = df_out.sort_values(cols.score).reset_index().to_markdown(floatfmt='.3f')
+    logger.info(f"inference results:\n{md_table}")
+    return df_out
 
 
-def _tokenizer(text):
+def tokenizer(text):
     return segtok.tokenizer.symbol_tokenizer(
         ' '.join(flair.data.word_tokenizer(text)))
 
 
-class _RNNModel:
+class RNNModel:
     flair_model_name = 'sentiment-fast'
 
     _model: flair.models.TextClassifier = None
     _vocab = set()
     _max_pred_tokens = 20
+    _cache = {}
 
     @property
     def _model_path(self):
@@ -80,18 +85,34 @@ class _RNNModel:
             return 0.5 - 0.5 * sentence.labels[0].score
 
     def _texts_prep(self, str_list: Iterable[str]) -> List[flair.data.Sentence]:
-        sents = [flair.data.Sentence(s, use_tokenizer=_tokenizer)
+        sents = [flair.data.Sentence(s, use_tokenizer=tokenizer)
                  for s in str_list]
         self._sanitize_oov(sents)
         self._truncate_long_texts(sents)
         return sents
 
-    @functools.lru_cache(maxsize=1000)
-    def negativity_scores(self, str_list: Tuple[str]):
+    def _inference_into_cache(self, new_sentences: List[flair.data.Sentence]):
+        # predict
+        logger.info(f'inferencing for {len(new_sentences)} sentences')
+        self.model.predict(new_sentences, mini_batch_size=1024, verbose=True)
+        new_scores = [self._negativity_score(s) for s in new_sentences]
+
+        # update cache
+        new_texts = [s.to_plain_string() for s in new_sentences]
+        self._cache.update({k: v for k, v in zip(new_texts, new_scores)})
+
+    def negativity_scores(self, str_list: Iterable[str]):
         sents = self._texts_prep(str_list)
-        self.model.predict(sents, mini_batch_size=1024, verbose=True)
-        scores = [self._negativity_score(s) for s in sents]
         texts = [s.to_plain_string() for s in sents]
+
+        # update cache
+        new_sents = [sent for sent, text in zip(sents, texts)
+                     if text not in self._cache]
+        self._inference_into_cache(new_sents)
+
+        # get from cache
+        scores = [self._cache[text] for text in texts]
+
         return scores, texts
 
     def _extract_embedding_vocab(self):
@@ -124,14 +145,14 @@ class _RNNModel:
             sent.tokens = sent.tokens[:self._max_pred_tokens]
 
 
-class _TransfomerModel(_RNNModel):
+class TransfomerModel(RNNModel):
     flair_model_name = 'sentiment'
 
     def _extract_embedding_vocab(self):
         return list(self.model.document_embeddings.tokenizer.vocab.keys())
 
 
-# model = _RNNModel()
-model = _TransfomerModel()
+# model = RNNModel()
+model = TransfomerModel()
 
 model.load()
