@@ -7,7 +7,6 @@ $.fn.immediateText = function() {
     return this.contents().not(this.children()).text();
 };
 
-
 function qualifyElement(index, element) {
     text = $(this).immediateText();
 
@@ -18,7 +17,6 @@ function qualifyElement(index, element) {
     return (n_words >= 3);
 }
 
-
 function collectTexts(elements) {
     texts = [];
     elements.each(function (index) {
@@ -28,29 +26,30 @@ function collectTexts(elements) {
 }
 
 
-function markByBackend(elements) {
+function markByBackend(callback) {
+    elements = findElements();
     chrome.storage.sync.get({
         backend: 'default',
     }, function(stored) {
         backend = stored.backend;
         console.log("stored backend setting: " + backend);
         if (backend == "simple") {
-            simpleHeuristicBackend(elements);
+            simpleHeuristicBackend(elements, callback);
         } else {
-            pythonSentimentBackend(elements);
+            pythonSentimentBackend(elements, callback);
         };
     });
 }
 
-
-function pythonSentimentBackend(elements) {
+function pythonSentimentBackend(elements, callback) {
     texts = collectTexts(elements);
     $.ajax({
         type: 'post',
         url: 'http://localhost:8000/sentiment/',
         data: JSON.stringify({'texts': texts}),
         success: function(data, status) {
-            markByValues(elements, data.values, data.ranks);
+            setSentimentData(elements, data.values, data.ranks);
+            callback();
         },
         error: function(xhr, status, error) {
             alert(xhr.responseText);
@@ -58,7 +57,7 @@ function pythonSentimentBackend(elements) {
     });
 }
 
-function simpleHeuristicBackend(elements) {
+function simpleHeuristicBackend(elements, callback) {
     texts = collectTexts(elements);
     values = [];
     texts.forEach(function (text, index) {
@@ -75,7 +74,8 @@ function simpleHeuristicBackend(elements) {
         }
         values[index] = value;
     });
-    markByValues(elements, values, arrayDenseRanks(values));
+    setSentimentData(elements, values, arrayDenseRanks(values));
+    callback();
 }
 
 function arrayDenseRanks(arr) {
@@ -88,7 +88,16 @@ function arrayDenseRanks(arr) {
     return ranks;
 }
 
-function markByValues(elements, neg_values, neg_ranks) {
+function setSentimentData(elements, neg_values, neg_ranks) {
+    max_rank = Math.max.apply(null, neg_ranks);
+    elements.each(function (index) {
+        $(this).addClass('negativityText');
+        $(this).attr('data-negativity-value', neg_values[index]);
+        $(this).attr('data-negativity-rank', neg_ranks[index] / max_rank);
+    });
+}
+
+function adjustStyle() {
     neg_margin = 0.0;
     pos_margin = 0.0;
     min_opacity = 0.1
@@ -104,13 +113,12 @@ function markByValues(elements, neg_values, neg_ranks) {
        threshold = stored.threshold / 100;
        neg_threshold = Math.min(threshold + neg_margin, 99.9);
        pos_threshold = Math.max(threshold - pos_margin, 0.01);
-       max_rank = Math.max.apply(null, neg_ranks);
 
-       elements.each(function (index) {
+       $(".negativityText").each(function () {
            if (stored.ranking) {
-               neg_score = neg_ranks[index] / max_rank;
+               neg_score = parseFloat($(this).attr("data-negativity-rank"));
            } else {
-               neg_score = neg_values[index];
+               neg_score = parseFloat($(this).attr("data-negativity-value"));
            };
 
            // opacity
@@ -142,9 +150,15 @@ function markByValues(elements, neg_values, neg_ranks) {
     });
 }
 
-elements = findElements();
-markByBackend(elements)
+
+markByBackend(adjustStyle);
+
 chrome.storage.onChanged.addListener(function(changes) {
-    markByBackend(elements);
+    console.log(changes);
+    if (changes.backend != null) {
+        markByBackend(adjustStyle);
+    } else {
+        adjustStyle();
+    };
 })
 chrome.runtime.sendMessage({}, function(response) {});

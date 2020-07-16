@@ -13,11 +13,8 @@
     "storage"
 	],
   "content_scripts": [
-    { 
-      "matches": [
-        "http://*/*",
-        "https://*/*"
-      ],
+    {
+      "matches": ["http://*/*", "https://*/*", "file://*/*"],
       "js": ["js/jquery-3.1.1.min.js", "js/filter.js"],
       "run_at": "document_idle",
       "all_frames": false
