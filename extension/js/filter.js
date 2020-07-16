@@ -164,9 +164,10 @@ function adjustStyle() {
     });
 }
 
-
+// initial run
 markByBackend(adjustStyle);
 
+// watch for option changes
 chrome.storage.onChanged.addListener(function(changes) {
     console.log(changes);
     if (changes.backend != null) {
@@ -175,4 +176,19 @@ chrome.storage.onChanged.addListener(function(changes) {
         adjustStyle();
     };
 })
-chrome.runtime.sendMessage({}, function(response) {});
+
+
+// watch for dynamically added elements (infinite scroll)
+added = 0;
+observer = new MutationObserver(function(mutationsList, observer) {
+    for(let mutation of mutationsList) {
+        added += mutation.addedNodes.length;
+    }
+    if (added >= 20) {
+        markByBackend(adjustStyle);
+        added = 0;
+    }
+});
+observer.observe(document.body, {attributes: false,
+                                 childList: true,
+                                 subtree: true});
