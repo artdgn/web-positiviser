@@ -6,8 +6,17 @@ $.fn.immediateText = function() {
     text = this.contents().not(this.children()).text();
 
     // handle img tags
-    alt_text = $(this).attr("alt");
-    text = (alt_text != null) ? text + ' ' + alt_text : text;
+    if (!text) {
+        alt_text = $(this).attr("alt");
+        text = (alt_text != null) ? text + ' ' + alt_text : text;
+    };
+
+    // handle a tags
+    if (!text) {
+        label_text = $(this).attr("label") ? $(this).attr("label") : "";
+        title_text = $(this).attr("title") ? $(this).attr("title") : "";
+        text = text + ' ' + label_text + ' ' + title_text
+    };
 
     return text;
 };

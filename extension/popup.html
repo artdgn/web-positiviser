@@ -13,7 +13,7 @@ Allows user to adjust filtration settings.
 				<span>Options</span>
 			</div>
 			<div class="optionRow">
-				<label for="selectedStyling">Styling</label>
+				<label for="selectedStyling">Styling mode</label>
 				<select id="selectedStyling" class="storedOptions">
 					<option value="default">&nbspDefault&nbsp</option>
 					<option value="with_color">&nbspWith Colors&nbsp</option>
@@ -21,24 +21,25 @@ Allows user to adjust filtration settings.
 			</div>
 
 			<div class="optionRow">
-				<label for="selectedBackend">Backend</label>
+
+				<label for="selectedThreshold">Negativity threshold</label>
+				<input class="slider storedOptions" id="selectedThreshold"
+					   type="range" min="0" max="100" value="50" >
+			</div>
+
+			<div class="optionRow">
+				<label for="selectedRankingCheck">Use relative values</label>
+				<input class="storedOptions" type="checkbox" id="selectedRankingCheck">
+			</div>
+
+            <div class="optionRow">
+				<label for="selectedBackend">Calculation</label>
 				<select id="selectedBackend" class="storedOptions">
 					<option value="default">&nbspDefault&nbsp</option>
 					<option value="simple">&nbspSimple&nbsp</option>
 				</select>
 			</div>
 
-			<div class="optionRow">
-
-				<label for="selectedThreshold">Positivity threshold</label>
-				<input class="slider storedOptions" id="selectedThreshold"
-					   type="range" min="0" max="100" value="50" >
-			</div>
-
-			<div class="optionRow">
-				<label for="selectedRankingCheck">Ranks instead of values</label>
-				<input class="storedOptions" type="checkbox" id="selectedRankingCheck">
-			</div>
 		</div>
 	</div>
 </body>
