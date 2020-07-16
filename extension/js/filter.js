@@ -75,16 +75,18 @@ function simpleHeuristicBackend(elements) {
         }
         values[index] = value;
     });
-
-    sorted = Array.from(new Set(values)).sort(function(a,b){
-        return a-b;
-    });
-    ranks = values.map(function(v){
-        return sorted.indexOf(v)+1;
-    });
-    markByValues(elements, values, ranks);
+    markByValues(elements, values, arrayDenseRanks(values));
 }
 
+function arrayDenseRanks(arr) {
+    sorted = Array.from(new Set(arr)).sort(function(a, b) {
+        return a - b;
+    });
+    ranks = arr.map(function(v) {
+        return sorted.indexOf(v) + 1;
+    });
+    return ranks;
+}
 
 function markByValues(elements, neg_values, neg_ranks) {
     neg_margin = 0.0;
@@ -96,9 +98,8 @@ function markByValues(elements, neg_values, neg_ranks) {
        threshold: 50,
        ranking: false
     }, function(stored) {
-       console.log("stored styling setting: " + stored.styling);
-       console.log("stored threshold setting: " + stored.threshold);
-       console.log("stored ranking setting: " + stored.ranking);
+       console.log("stored settings:");
+       console.log(stored);
 
        threshold = stored.threshold / 100;
        neg_threshold = Math.min(threshold + neg_margin, 99.9);
