@@ -1,13 +1,41 @@
+import functools
+import logging
 import os
 import re
 import shutil
-import functools
 from typing import List, Tuple, Iterable
 
 import flair
+import pandas as pd
 import segtok.tokenizer
 
+from backend import data_models
+from backend.sentiment import domain_vocab
 from backend.utils import common
+
+
+logger = logging.getLogger(__name__)
+
+cols = data_models.Cols
+
+
+def sentiment_results_dataframe(texts: Iterable[str]):
+    # TODO: refactor into a class with (caching, filtering, substituting, deduping..)
+
+    texts_filtered = [' '.join(_tokenizer(s)) for s in texts]
+
+    df_in = pd.DataFrame({cols.text: texts_filtered})
+
+    no_dups = df_in.drop_duplicates()
+
+    replaced_vocab_texts = domain_vocab.substitute_words(no_dups[cols.text])
+
+    no_dups[cols.score], no_dups[cols.processed_text] = (
+        model.negativity_scores(tuple(replaced_vocab_texts)))
+
+    logger.info(f"no dups:\n{no_dups.sort_values(cols.score).to_markdown(floatfmt='.3f')}")
+
+    return pd.merge(df_in, no_dups, on='text', how='left')
 
 
 def _tokenizer(text):

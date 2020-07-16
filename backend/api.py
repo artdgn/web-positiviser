@@ -1,13 +1,11 @@
 import logging
-from typing import List
 
-import pandas as pd
-import pydantic
 import fastapi
 from fastapi.middleware import cors
 
+from backend import data_models
+from backend.sentiment import flairnlp
 from backend.utils import common
-from backend.sentiment import flairnlp, domain_vocab
 
 common.pandas_options()
 
@@ -25,22 +23,15 @@ app.add_middleware(
 )
 
 
-# needed for post method
-class RequestData(pydantic.BaseModel):
-    texts: List[str]
-
-
 @app.post("/sentiment/")
-def sentiment_flair(data: RequestData):
-    replaced_vocab_texts = domain_vocab.substitute_words(data.texts)
-    scores, filtered_texts = flairnlp.model.negativity_scores(tuple(replaced_vocab_texts))
+def sentiment_flair(data: data_models.RequestData):
+    cols = data_models.Cols
 
-    values_df = pd.DataFrame(
-        {'score': scores, 'text': data.texts, 'filtered_text': filtered_texts}
-    )
+    df_out = flairnlp.sentiment_results_dataframe(data.texts)
 
-    md_table = values_df.sort_values('score').to_markdown(floatfmt='.3f')
-    logger.info(f"scores and texts:\n{md_table}")
+    return data_models.ResponseData(
+        values=df_out[cols.score].to_list(),
+        ranks=df_out[cols.score].rank(method='first').to_list())
 
     return {'values': values_df['score'].to_list(),
             'ranks': values_df['score'].rank(method='first').to_list()}

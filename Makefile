@@ -19,11 +19,11 @@ install: .venv
 	pip install -r requirements.txt
 
 kill-server:
-	pkill -f $(REPO_NAME)
+	kill -9 `netstat -tulpn | grep $(PORT) | grep -oP "(?<=)\d+(?=\/)"`
 
 server:
 	$(VENV_ACTIVATE); \
-	gunicorn backend.api:app --reload -k uvicorn.workers.UvicornWorker
+	python server.py
 
 build-docker:
 	docker build -t $(DOCKER_TAG) .
