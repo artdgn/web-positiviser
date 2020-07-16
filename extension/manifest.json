@@ -1,12 +1,12 @@
 {
   "manifest_version": 2,
-  "name": "Bad News Fader",
+  "name": "Negativity Balancer",
   "version": "0.1.0",
-  "description": "Bad News Fader",
+  "description": "Using sentiment analysis to reduce bad news visibility.",
   "browser_action" :
   {
     "default_icon" : "images/icon.png",
-    "default_title" : "Bad News Fader",
+    "default_title" : "Negativity Balancer",
     "default_popup": "popup.html"
   },
   "permissions": [

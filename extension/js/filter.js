@@ -177,8 +177,7 @@ chrome.storage.onChanged.addListener(function(changes) {
     };
 })
 
-
-// watch for dynamically added elements (infinite scroll)
+// watch for dynamically added elements (infinite scroll / twitter load)
 added = 0;
 observer = new MutationObserver(function(mutationsList, observer) {
     for(let mutation of mutationsList) {
