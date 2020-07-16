@@ -4,11 +4,11 @@ import pandas as pd
 
 _translations = {
     r'covid|cases|pandemic|virus|coronavirus': 'sickness',
-    r'trump': 'bafoon'
+    r'trump': 'dictator'
 }
 
 
 def substitute_words(texts: List[str]):
-    return (pd.Series(texts).str.lower()
+    return (pd.Series(texts).astype(str).str.lower()
             .replace(_translations, regex=True)
             .to_list())
