@@ -160,7 +160,17 @@ function adjustStyle() {
                                `rgba(${max_green - color_val}, 255, ${max_green - color_val}, 0.4)`);
                }
            } else {
-               $(this).css('background-color', 'white');
+               $(this).css('background-color', "inherit");
+           };
+
+           structural = "div,tr,nav"
+           if ((stored.styling == "remove") && (neg_score >= neg_threshold)) {
+                // remove
+               $(this).hide(100);
+               $(this).closest(structural).hide(100);
+           } else {
+               $(this).show(100);
+               $(this).closest(structural).show(100)
            };
        });
     });
