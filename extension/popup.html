@@ -12,31 +12,31 @@ Allows user to adjust filtration settings.
 			<div id="title" >
 				<span>Options</span>
 			</div>
-			<div class="optionRow">
+			<div class="optionRow" title="Choose how to alter negative&#013;items' visibility">
 				<label for="selectedStyling">Styling mode</label>
 				<select id="selectedStyling" class="storedOptions">
-					<option value="default">&nbspDefault&nbsp</option>
-					<option value="with_color">&nbspWith Colors&nbsp</option>
+					<option value="opacity">&nbspOpacity&nbsp</option>
+					<option value="color">&nbspColors&nbsp</option>
 				</select>
 			</div>
 
-			<div class="optionRow">
-
+			<div class="optionRow" title="Adjust for higher or lower sensitivity">
 				<label for="selectedThreshold">Negativity threshold</label>
 				<input class="slider storedOptions" id="selectedThreshold"
-					   type="range" min="0" max="100" value="50" >
+					   type="range" min="0" max="100" value="50">
 			</div>
 
-			<div class="optionRow">
+			<div class="optionRow"
+				 title="Toggle to use relative sensitivity&#013;(e.g. set threshold to 20% consider&#013;only bottom 20% as positive)">
 				<label for="selectedRankingCheck">Use relative values</label>
 				<input class="storedOptions" type="checkbox" id="selectedRankingCheck">
 			</div>
 
-            <div class="optionRow">
+            <div class="optionRow" title="How to calculate negativity values">
 				<label for="selectedBackend">Calculation</label>
 				<select id="selectedBackend" class="storedOptions">
-					<option value="default">&nbspDefault&nbsp</option>
-					<option value="simple">&nbspSimple&nbsp</option>
+					<option value="python">&nbspPython&nbsp</option>
+					<option value="simple">&nbspJS-Stub&nbsp</option>
 				</select>
 			</div>
 

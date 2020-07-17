@@ -1,7 +1,7 @@
 ## Negativity Balancer:
 Using sentiment analysis to reduce bad news visibility.
 
-![bad-news](https://user-images.githubusercontent.com/29574203/87683729-c45a6f80-c7c4-11ea-9484-34deedd7933e.gif)
+![negativity-balancer.gif](https://artdgn.github.io/images/negativity-balancer.gif)
 
 ## What is this?
 - A chrome extension that uses a sentiment analysis model
@@ -37,7 +37,7 @@ but it does work pretty well to re-balance the amount of negative and positive i
 - Run server: `make server`
 
 ##### Option #3: No backend:
-- Just choose **"Simple"** in "Calculation" option in the extension options 
+- Just choose **"JS-Stub"** in "Calculation" option in the extension options 
 (on icon press). This will use browser side analysis, that is **very** naive for 
 now. I'm planning on adding a proper rule based library to do that, or eventually try doing DL inference in JS.  
 

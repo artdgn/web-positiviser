@@ -43,7 +43,7 @@ function collectTexts(elements) {
 function markByBackend(callback) {
     elements = findElements();
     chrome.storage.sync.get({
-        backend: 'default',
+        backend: 'python',
     }, function(stored) {
         backend = stored.backend;
         console.log("stored backend setting: " + backend);
@@ -117,7 +117,7 @@ function adjustStyle() {
     min_opacity = 0.1
 
     chrome.storage.sync.get({
-       styling: 'default',
+       styling: 'opacity',
        threshold: 50,
        ranking: false
     }, function(stored) {
@@ -135,31 +135,33 @@ function adjustStyle() {
                neg_score = parseFloat($(this).attr("data-negativity-value"));
            };
 
-           // opacity
-           if (neg_score >= neg_threshold) {
+           if ((stored.styling == "opacity") && (neg_score >= neg_threshold)) {
+                // opacity
                norm_score = (neg_score - neg_threshold) / (1 - neg_threshold);
                opacity = 1 - norm_score * (1 - min_opacity);
                $(this).css('opacity', opacity);
            } else {
                $(this).css('opacity', 1.0);
-           }
+           };
 
            // color
-           if (stored.styling == "with_color") {
+           if (stored.styling == "color") {
                if (neg_score >= neg_threshold) {
+                   max_red = 200;
                    norm_score = (neg_score - neg_threshold) / (1 - neg_threshold);
-                   color_val = Math.round(255 * norm_score);
+                   color_val = Math.round(max_red * Math.pow(norm_score, 3));
                    $(this).css('background-color',
-                               `rgba(255, ${255 - color_val}, ${255 - color_val})`);
+                               `rgba(255, ${max_red - color_val}, ${max_red - color_val}, 0.4)`);
                } else if (neg_score < pos_threshold) {
+                   max_green = 200;
                    norm_score = (pos_threshold - neg_score) / pos_threshold;
-                   color_val = Math.round(255 * norm_score);
+                   color_val = Math.round(max_green * Math.pow(norm_score, 3));
                    $(this).css('background-color',
-                               `rgba(${255 - color_val}, 255, ${255 - color_val}, 0.5)`);
+                               `rgba(${max_green - color_val}, 255, ${max_green - color_val}, 0.4)`);
                }
            } else {
                $(this).css('background-color', 'white');
-           }
+           };
        });
     });
 }

@@ -20,8 +20,8 @@ function setFromStored(stored) {
 
 function getOptions(callback) {
   chrome.storage.sync.get({
-    styling: 'default',
-    backend: 'default',
+    styling: 'opacity',
+    backend: 'python',
     threshold: 50,
     ranking: false
   }, function(stored) {
