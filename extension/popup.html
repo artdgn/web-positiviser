@@ -5,6 +5,46 @@ Allows user to adjust filtration settings.
 <html>
 <head>
 	<title>Options</title>
+	<style>
+	body {
+		width: 20rem;
+		margin: 0;
+	}
+	.container {
+		display: flex;
+		flex-direction: column;
+		padding: 1rem;
+		font-size: 1.25rem;
+		background-color: #f2f2ff;
+		color: #382381;
+		border: 2px #183578;
+	}
+	#title {
+		padding-top: 0.3rem;
+		padding-bottom: 0.7rem;
+		font-size: 1.75rem;
+		font-weight: bold;
+		text-align: center;
+	}
+	.option-row {
+		display: flex;
+		justify-content: space-between;
+		flex-direction: row;
+		margin-top: 0.5rem;
+	}
+	input[type=range] {
+		width: 100%;
+	}
+	input[type=checkbox] {
+		transform: scale(1.5);
+	}
+	select {
+		width: 50%;
+		font-size: 1.25rem;
+		text-align: center;
+		background-color: #f2f2ff;
+	}
+	</style>
 </head>
 <body>
 	<div class="container">
@@ -12,30 +52,30 @@ Allows user to adjust filtration settings.
 			<div id="title" >
 				<span>Options</span>
 			</div>
-			<div class="optionRow" title="Choose how to alter negative&#013;items' visibility">
-				<label for="selectedStyling">Styling mode</label>
-				<select id="selectedStyling" class="storedOptions">
-					<option value="opacity">&nbspOpacity&nbsp</option>
+			<div class="option-row" title="Choose how to alter negative&#013;items' visibility">
+				<label for="selected-styling">Styling mode</label>
+				<select id="selected-styling" class="stored-options">
+					<option value="opacity">&nbspTransparency&nbsp</option>
 					<option value="color">&nbspColors&nbsp</option>
 					<option value="remove">&nbspRemove&nbsp</option>
 				</select>
 			</div>
 
-			<div class="optionRow" title="Increase to show more / Decrease for less">
-				<label for="selectedThreshold">Negativity tolerance</label>
-				<input class="slider storedOptions" id="selectedThreshold"
+			<div class="option-row" title="Increase to show more / Decrease for less">
+				<label for="selected-threshold">Negativity tolerance</label>
+				<input class="slider stored-options" id="selected-threshold"
 					   type="range" min="0" max="100" value="50">
 			</div>
 
-			<div class="optionRow"
+			<div class="option-row"
 				 title="Toggle to use relative sensitivity&#013;(e.g. set threshold to 20% to show only 20%)">
-				<label for="selectedRankingCheck">Use percentage values</label>
-				<input class="storedOptions" type="checkbox" id="selectedRankingCheck">
+				<label for="selected-ranking-check">Use percentage values</label>
+				<input class="stored-options" type="checkbox" id="selected-ranking-check">
 			</div>
 
-            <div class="optionRow" title="How to calculate negativity values">
-				<label for="selectedBackend">Calculation</label>
-				<select id="selectedBackend" class="storedOptions">
+            <div class="option-row" title="How to calculate negativity values">
+				<label for="selected-backend">Calculation</label>
+				<select id="selected-backend" class="stored-options">
 					<option value="python">&nbspPython&nbsp</option>
 					<option value="simple">&nbspJS-Stub&nbsp</option>
 				</select>
@@ -43,48 +83,7 @@ Allows user to adjust filtration settings.
 
 		</div>
 	</div>
+	<script type="text/javascript" src="js/popup.js"></script>
 </body>
-<script type="text/javascript" src="js/popup.js"></script>
-
-<style>
-body {
-	width: 20rem;
-	margin: 0;
-}
-.container {
-	display: flex;
-	flex-direction: column;
-	padding: 1rem;
-	font-size: 1.25rem;
-	background-color: #f2f2ff;
-	color: #382381;
-	border: 2px #183578;
-}
-#title {
-	padding-top: 0.3rem;
-	padding-bottom: 0.7rem;
-	font-size: 1.75rem;
-	font-weight: bold;
-	text-align: center;
-}
-.optionRow {
-	display: flex;
-	justify-content: space-between;
-	flex-direction: row;
-	margin-top: 0.5rem;
-}
-input[type=range] {
-	width: 100%;
-}
-input[type=checkbox] {
-    transform: scale(1.5);
-}
-select {
-	width: 50%;
-	font-size: 1.25rem;
-	text-align: center;
-	background-color: #f2f2ff;
-}
-</style>
 </html>
 

@@ -9,9 +9,7 @@
     "default_title" : "Negativity Balancer",
     "default_popup": "popup.html"
   },
-  "permissions": [
-    "storage"
-	],
+  "permissions": ["storage"],
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*", "file://*/*"],
