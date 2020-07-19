@@ -4,7 +4,7 @@ Using sentiment analysis to reduce bad news visibility.
 ![negativity-balancer.gif](https://artdgn.github.io/images/negativity-balancer.gif)
 
 ## What is this?
-- A chrome extension that uses a sentiment analysis model
+- A browser extension that uses a sentiment analysis model
 running in the background to score elements based on negativity 
 of the text in them and adjust the style to reduce their visibility.
 - This is very much a work in progress and not a ready to be used extension
@@ -16,16 +16,16 @@ but it does work pretty well to re-balance the amount of negative and positive i
 
 ### Running locally 
 
-
-#### Browser extension (Chrome for now):
-- Install (Chrome):
-    - Navigate to extensions.
-    - Enable "developer mode".
-    - "Load unpacked extensions".
-    - Navigate to "/extension" folder in this project.
-- To update (on code changes): go to extension details and press update.
+#### Browser extension (Chrome / Firefox):
+- Install:
+    - [Chrome instructions docs](https://developer.chrome.com/extensions/getstarted#manifest):
+        - Extensions -> Enable "developer mode" -> 
+        "Load unpacked extensions" -> Navigate to "/extension" folder in this project.
+    - [Firefox instructions docs](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Your_first_WebExtension#Installing): 
+        - about:debugging -> "This firefox" link -> 
+        "Load temporary add-on" -> Choose any file in the extension folder (e.g. `manifest.json`)
+- To update (on code changes): go to extension details and press update / reload.
    
-
 
 #### Inference server (first run will take time to download the model):
 ##### Option #1: Docker:

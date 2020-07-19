@@ -1,5 +1,7 @@
 const structuralNodesSelector = "div,tr,nav";
-const textNodesSelector = "h1,h2,h3,h4,h5,p,span,li,a,img,strong";
+const textNodesSelector = 
+  "h1,h2,h3,h4,h5,p,span,li,a,img," + 
+  "strong,em,font,big,small,b,i,u,td";
 
 function findTextElements() {
     return $(textNodesSelector).filter((i, element) => {
@@ -59,6 +61,7 @@ function pythonSentimentBackend(elements, callback) {
     }).then(response => {
         if (response.status !== 200) {
             alert(`Backend returned error: ${response.status}`);
+            console.log(response);
             return;
         };
         return response.json();
@@ -67,6 +70,7 @@ function pythonSentimentBackend(elements, callback) {
         callback();
     }).catch((error) => {
         alert(`Backend call failed: ${error}`);
+        console.log(error);
     });
 }
 
