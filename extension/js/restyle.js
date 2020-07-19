@@ -1,8 +1,19 @@
-function findElements() {
-    return $("h1,h2,h3,h4,h5,p,span,li,a,img,strong").filter(qualifyElement);
-}
+const structuralNodesSelector = "div,tr,nav";
+const textNodesSelector = "h1,h2,h3,h4,h5,p,span,li,a,img,strong";
 
-function immediateText(element) {
+function findTextElements() {
+    return $(textNodesSelector).filter((i, element) => {
+        const text = extractImmediateText(element);
+
+        // words number
+        const wordMatches = text.match(/[\S]{3,}/g);
+        const numWords = wordMatches ? wordMatches.length : 0;
+
+        return (numWords >= 3);
+    });
+};
+
+function extractImmediateText(element) {
     element = $(element);
 
     let text = element.contents().not(element.children()).text();
@@ -23,22 +34,12 @@ function immediateText(element) {
     return text;
 };
 
-function qualifyElement(index, element) {
-    const text = immediateText(element);
-
-    // words number
-    const wordMatches = text.match(/[\S]{3,}/g);
-    const numWords = wordMatches ? wordMatches.length : 0;
-
-    return (numWords >= 3);
-}
-
 function collectTexts(elements) {
-    return $.map(elements, (el) => immediateText(el));
+    return $.map(elements, (el) => extractImmediateText(el));
 }
 
 function markByBackend(callback) {
-    const elements = findElements();
+    const elements = findTextElements();
     chrome.storage.sync.get({
         backend: 'python',
     }, function(stored) {
@@ -57,7 +58,7 @@ function pythonSentimentBackend(elements, callback) {
         body: JSON.stringify({'texts': texts})
     }).then(response => {
         if (response.status !== 200) {
-            alert(`Backed returned error: ${response.status}`);
+            alert(`Backend returned error: ${response.status}`);
             return;
         };
         return response.json();
@@ -65,7 +66,7 @@ function pythonSentimentBackend(elements, callback) {
         setSentimentData(elements, data.values, data.ranks);
         callback();
     }).catch((error) => {
-        alert(`Backed call failed: ${error}`);
+        alert(`Backend call failed: ${error}`);
     });
 }
 
@@ -120,8 +121,8 @@ function adjustStyle() {
                score = parseFloat($(el).attr("data-negativity-value"));
            };
 
+           // opacity
            if ((stored.styling == "opacity") && (score >= threshold)) {
-                // opacity
                const normScore = (score - threshold) / (1 - threshold);
                const opacity = 1 - normScore * (1 - minOpacity);
                $(el).css('opacity', opacity);
@@ -149,14 +150,13 @@ function adjustStyle() {
                $(el).css('background-color', "inherit");
            };
 
-           const structural = "div,tr,nav";
+           // remove
            if ((stored.styling == "remove") && (score >= threshold)) {
-                // remove
                $(el).hide(100);
-               $(el).closest(structural).hide(100);
+               $(el).closest(structuralNodesSelector).hide(100);
            } else {
                $(el).show(100);
-               $(el).closest(structural).show(100);
+               $(el).closest(structuralNodesSelector).show(100);
            };
        });
     });

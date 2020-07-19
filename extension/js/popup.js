@@ -8,27 +8,23 @@ function saveOptions() {
     chrome.storage.sync.set(options, () => void console.log(options));
 }
 
-function setFromStored(stored) {
-    document.getElementById('selected-styling').value = stored.styling;
-    document.getElementById('selected-backend').value = stored.backend;
-    document.getElementById('selected-threshold').value = stored.threshold;
-    document.getElementById('selected-ranking-check').checked = stored.ranking;
-}
-
-function getOptions(callback) {
+function udpateFromStored() {
     chrome.storage.sync.get({
         styling: 'opacity',
         backend: 'python',
         threshold: 50,
         ranking: false
-    }, (stored) => void callback(stored));
+    }, (stored) => {
+        document.getElementById('selected-styling').value = stored.styling;
+        document.getElementById('selected-backend').value = stored.backend;
+        document.getElementById('selected-threshold').value = stored.threshold;
+        document.getElementById('selected-ranking-check').checked = stored.ranking;
+    });
 }
 
-function restoreOptions() {
-    getOptions(setFromStored);
+document.addEventListener('DOMContentLoaded', () => {
+    udpateFromStored();
     for (element of document.getElementsByClassName('stored-options')) {
         element.addEventListener('change', saveOptions);
     };
-}
-
-document.addEventListener('DOMContentLoaded', restoreOptions);
+});
