@@ -1,110 +1,99 @@
-const structuralNodesSelector = "div,tr,nav";
+const structuralNodesSelector = 'div,tr,nav';
 const textNodesSelector = 
-  "h1,h2,h3,h4,h5,p,span,li,a,img," + 
-  "strong,em,font,big,small,b,i,u,td";
+    'h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td';
+const wordPattern = /[a-z]{3,}/ig
 
 function findTextElements() {
-    return $(textNodesSelector).filter((i, element) => {
-        const text = extractImmediateText(element);
+  return $(textNodesSelector).filter((i, element) => {
+    const text = extractImmediateText(element);
 
-        // words number
-        const wordMatches = text.match(/[\S]{3,}/g);
-        const numWords = wordMatches ? wordMatches.length : 0;
+    const wordMatches = text.match(wordPattern);
+    const numWords = wordMatches ? wordMatches.length : 0;
 
-        return (numWords >= 3);
-    });
-};
-
-function extractImmediateText(element) {
-    element = $(element);
-
-    let text = element.contents().not(element.children()).text();
-
-    // handle img tags
-    if (!text) {
-        const altText = $(element).attr("alt");
-        text = (altText != null) ? `${text} ${altText}`: text;
-    };
-
-    // handle a tags
-    if (!text) {
-        const labelText = $(element).attr("label") ? $(element).attr("label") : "";
-        const titleText = $(element).attr("title") ? $(element).attr("title") : "";
-        text = `${text} ${labelText} ${titleText}`
-    };
-
-    return text;
-};
-
-function collectTexts(elements) {
-    return $.map(elements, (el) => extractImmediateText(el));
+    return (numWords >= 3);
+  });
 }
 
-function markByBackend(callback) {
-    const elements = findTextElements();
-    chrome.storage.sync.get({
-        backend: 'python',
-    }, function(stored) {
-        if (stored.backend == "simple") {
-            simpleHeuristicBackend(elements, callback);
-        } else {
-            pythonSentimentBackend(elements, callback);
-        };
-    });
+function extractImmediateText(element) {
+  element = $(element);
+
+  let text = element.contents().not(element.children()).text();
+
+  // handle img tags
+  text = text || `${element.attr('alt') || ''}`;
+
+  // handle a tags  
+  text = text || `${element.attr('label') || ''} ${element.attr('title') || ''}`
+  
+  return text;
+}
+
+function collectTexts(elements) {
+  return $.map(elements, (el) => extractImmediateText(el));
+}
+
+function processTextsByBackend(callback) {
+  const elements = findTextElements();
+  chrome.storage.sync.get({
+    backend: 'python',
+  }, function(settings) {
+    if (settings.backend == 'simple') {
+      simpleHeuristicBackend(elements, callback);
+    } else {
+      pythonSentimentBackend(elements, callback);
+    }
+  });
 }
 
 function pythonSentimentBackend(elements, callback) {
-    const texts = collectTexts(elements);
-    fetch('http://localhost:8000/sentiment/', {
-        method: 'post',
-        body: JSON.stringify({'texts': texts})
-    }).then(response => {
-        if (response.status !== 200) {
-            alert(`Backend returned error: ${response.status}`);
-            console.log(response);
-            return;
-        };
-        return response.json();
-    }).then(data => {
-        setSentimentData(elements, data.values, data.ranks);
-        callback();
-    }).catch((error) => {
-        alert(`Backend call failed: ${error}`);
-        console.log(error);
-    });
+  const texts = collectTexts(elements);
+  fetch('http://localhost:8000/sentiment/', {
+    method: 'post',
+    body: JSON.stringify({'texts': texts}),
+  }).then(response => {
+    if (response.status !== 200) {
+      alert(`Backend returned error: ${response.status}`);
+      console.log(response);
+      return;
+    }
+    return response.json();
+  }).then(data => {
+    setNegativityAttributes(elements, data.values, data.ranks);
+    callback();
+  }).catch((error) => {
+    alert(`Backend call failed: ${error}`);
+    console.log(error);
+  });
 }
 
 function simpleHeuristicBackend(elements, callback) {
-    const texts = collectTexts(elements);
-    const values = [];
-    texts.forEach((text, index) => {
-        // all words
-        const wordMatches = text.match(/[\S]{3,}/g);
-        const numWords = wordMatches ? wordMatches.length : 0;
+  const texts = collectTexts(elements);
+  const values = texts.map((text) => {
+    const wordMatches = text.match(wordPattern);
+    const numWords = wordMatches ? wordMatches.length : 0;
 
-        // bad words
-        const negativeMatches = text.match(/trump|covid|coronavirus|pandemic/ig);
-        const numNegatives = negativeMatches ? negativeMatches.length : 0;
+    const negativeMatches = text.match(/trump|covid|coronavirus|pandemic/ig);
+    const numNegatives = negativeMatches ? negativeMatches.length : 0;
 
-        values[index] = numNegatives / numWords;
-    });
-    setSentimentData(elements, values, arrayDenseRanks(values));
-    callback();
+    return numNegatives / numWords;
+  });
+  setNegativityAttributes(elements, values, arrayDenseRanks(values));
+  callback();
 }
 
 function arrayDenseRanks(arr) {
-    const sorted = Array.from(new Set(arr)).sort((a, b) => (a - b));
-    const ranks = arr.map((v) => (sorted.indexOf(v) + 1));
-    return ranks;
+  const sorted = Array.from(new Set(arr)).sort((a, b) => (a - b));
+  const ranks = arr.map((v) => (sorted.indexOf(v) + 1));
+  return ranks;
 }
 
-function setSentimentData(elements, negValues, negRanks) {
-    const maxRank = Math.max.apply(null, negRanks);
-    elements.each((i, el) => {
-        $(el).addClass('negativityText');
-        $(el).attr('data-negativity-value', negValues[i]);
-        $(el).attr('data-negativity-rank', negRanks[i] / maxRank);
-    });
+function setNegativityAttributes(elements, negValues, negRanks) {
+  const maxRank = Math.max.apply(null, negRanks);
+  elements.each((i, el) => {
+    $(el).addClass('negativityText');
+    $(el).attr('data-negativity-value', negValues[i]);
+    $(el).attr('data-negativity-rank', negRanks[i] / maxRank);
+  });
 }
 
 function adjustStyle() {
@@ -167,28 +156,28 @@ function adjustStyle() {
 }
 
 // initial run
-markByBackend(adjustStyle);
+processTextsByBackend(updateStyleAll);
 
 // watch for option changes
 chrome.storage.onChanged.addListener((changes) => {
-    console.log(changes);
-    if (changes.backend != null) {
-        markByBackend(adjustStyle);
-    } else {
-        adjustStyle();
-    };
+  console.log(changes);
+  if (changes.backend != null) {
+    processTextsByBackend(updateStyleAll);
+  } else {
+    updateStyleAll();
+  }
 });
 
 // watch for dynamically added elements (infinite scroll / twitter load)
 let added = 0;
 const observer = new MutationObserver((mutationsList, observer) => {
-    for(let mutation of mutationsList) {
-        added += mutation.addedNodes.length;
-    };
-    if (added >= 20) {
-        markByBackend(adjustStyle);
-        added = 0;
-    };
+  for (let mutation of mutationsList) {
+    added += mutation.addedNodes.length;
+  }
+  if (added >= 20) {
+    processTextsByBackend(updateStyleAll);
+    added = 0;
+  }
 });
 observer.observe(
     document.body, {attributes: false, childList: true, subtree: true});
