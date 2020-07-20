@@ -50,3 +50,6 @@ docker-update-server:
 
 docker-logs:
 	docker logs $(REPO_NAME) -f
+
+tests:
+	pytest

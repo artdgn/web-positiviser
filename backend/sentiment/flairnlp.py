@@ -24,14 +24,15 @@ def sentiment_results_dataframe(texts: Iterable[str]):
     df_in = pd.DataFrame({cols.text: texts_filtered})
 
     # dedup
-    no_dups = df_in.drop_duplicates()
+    no_dups = df_in.drop_duplicates().copy()
 
     # replace common important OOV words
     replaced_vocab_texts = domain_vocab.substitute_words(no_dups[cols.text])
 
     # get scores and final texts
-    no_dups[cols.score], no_dups[cols.processed_text] = (
-        model.negativity_scores(replaced_vocab_texts))
+    scores, processed_texts = model.negativity_scores(replaced_vocab_texts)
+    no_dups.loc[:, cols.score] = scores
+    no_dups.loc[:, cols.processed_text] = processed_texts
 
     # merge
     df_out = pd.merge(df_in, no_dups, on='text', how='left')

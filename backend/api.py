@@ -30,5 +30,3 @@ def sentiment_flair(data: data_models.RequestData) -> data_models.ResponseData:
     return data_models.ResponseData(
         values=df_out[data_models.Cols.score].to_list(),
         ranks=df_out[data_models.Cols.score].rank(method='first').to_list())
-
-
