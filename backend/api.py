@@ -23,16 +23,12 @@ app.add_middleware(
 )
 
 
-@app.post("/sentiment/")
-def sentiment_flair(data: data_models.RequestData):
-    cols = data_models.Cols
-
+@app.post("/sentiment/", response_model=data_models.ResponseData)
+def sentiment_flair(data: data_models.RequestData) -> data_models.ResponseData:
     df_out = flairnlp.sentiment_results_dataframe(data.texts)
 
     return data_models.ResponseData(
-        values=df_out[cols.score].to_list(),
-        ranks=df_out[cols.score].rank(method='first').to_list())
+        values=df_out[data_models.Cols.score].to_list(),
+        ranks=df_out[data_models.Cols.score].rank(method='first').to_list())
 
-    return {'values': values_df['score'].to_list(),
-            'ranks': values_df['score'].rank(method='first').to_list()}
 
