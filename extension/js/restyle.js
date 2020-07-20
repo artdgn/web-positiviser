@@ -96,63 +96,103 @@ function setNegativityAttributes(elements, negValues, negRanks) {
   });
 }
 
-function adjustStyle() {
-    const minOpacity = 0.1;
+function updateStyleAll() {
+  chrome.storage.sync.get({
+    styling: 'opacity',
+    threshold: 50,
+    ranking: false,
+  }, (settings) => {
+    const threshold = Math.max(Math.min(settings.threshold / 100, 99.9), 0.01);
+    const attrSuffix = settings.ranking ? 'rank': 'value';
 
-    chrome.storage.sync.get({
-       styling: 'opacity',
-       threshold: 50,
-       ranking: false
-    }, (stored) => {
-       const threshold = Math.max(Math.min(stored.threshold / 100, 99.9), 0.01);
+    const allParents = $(structuralNodesSelector).has('.negativityText');
+    const visitedChildren = new Set();
 
-       $(".negativityText").each((i, el) => {
-           let score;
-           if (stored.ranking) {
-               score = parseFloat($(el).attr("data-negativity-rank"));
-           } else {
-               score = parseFloat($(el).attr("data-negativity-value"));
-           };
+    // try to find highest parents of single neg-elements and update them
+    allParents.each((i, parent) => {
+      parent = $(parent);
+      const children = parent.find('.negativityText');
+      if (children.length == 1) {
+        const onlyChild = children[0];
 
-           // opacity
-           if ((stored.styling == "opacity") && (score >= threshold)) {
-               const normScore = (score - threshold) / (1 - threshold);
-               const opacity = 1 - normScore * (1 - minOpacity);
-               $(el).css('opacity', opacity);
-           } else {
-               $(el).css('opacity', 1.0);
-           };
+        if (visitedChildren.has(onlyChild)) return; // stop if already visited
 
-           // color
-           const maxColor = 200;
-           if (stored.styling == "color") {
-               if (score >= threshold) {
-                   const normScore = (score - threshold) / (1 - threshold);
-                   const colorVal = Math.round(maxColor * Math.pow(normScore, 3));
-                   $(el).css('background-color',
-                               `rgba(255, ${maxColor - colorVal},
-                                     ${maxColor - colorVal}, 0.4)`);
-               } else {
-                   const normScore = (threshold - score) / threshold;
-                   const colorVal = Math.round(maxColor * Math.pow(normScore, 3));
-                   $(el).css('background-color',
-                             `rgba(${maxColor - colorVal}, 255,
-                                   ${maxColor - colorVal}, 0.4)`);
-               };
-           } else {
-               $(el).css('background-color', "inherit");
-           };
-
-           // remove
-           if ((stored.styling == "remove") && (score >= threshold)) {
-               $(el).hide(100);
-               $(el).closest(structuralNodesSelector).hide(100);
-           } else {
-               $(el).show(100);
-               $(el).closest(structuralNodesSelector).show(100);
-           };
-       });
+        visitedChildren.add(onlyChild);
+        const score = parseFloat($(onlyChild).attr(`data-negativity-${attrSuffix}`));
+        updateElementOpacity(parent, score, threshold, settings);
+        updateElementColor(parent, score, threshold, settings);
+        updateElementVisibility(parent, score, threshold, settings); 
+      }
     });
+
+    // update all remaining elements that didn't find a single parent
+    const elements = $('.negativityText');
+    elements.each((i, element) => {
+      if (visitedChildren.has(element)) return; // stop if already visited
+
+      element = $(element);      
+      const score = parseFloat(element.attr(`data-negativity-${attrSuffix}`));
+      updateElementOpacity(element, score, threshold, settings);
+      updateElementColor(element, score, threshold, settings);
+      updateElementVisibility(element, score, threshold, settings);      
+    });
+  });
+}
+
+function updateElementOpacity(el, score, threshold, settings) {
+  const minOpacity = 0.1;
+  const origOpacity = el.attr('data-original-opacity');
+
+  if (origOpacity === undefined) {
+    el.attr('data-original-opacity', el.css('opacity'));
+  }
+
+  if ((settings.styling == 'opacity') && (score >= threshold)) {
+    const normScore = (score - threshold) / (1 - threshold);
+    const opacity = 1 - normScore * (1 - minOpacity);
+    el.css('opacity', opacity);
+  } else {
+    if (origOpacity !== undefined) el.css('opacity', origOpacity);
+  }
+}
+
+function updateElementColor(el, score, threshold, settings) {
+  const origColor = el.attr('data-original-background-color');
+  if (origColor === undefined) {
+    el.attr('data-original-background-color', el.css('background-color'));
+  }
+
+  const maxColor = 200;
+  if (settings.styling == 'color') {
+    if (score >= threshold) {
+      const normScore = (score - threshold) / (1 - threshold);
+      const colorVal = Math.round(maxColor * Math.pow(normScore, 3));
+      el.css('background-color',
+          `rgba(255, ${maxColor - colorVal}, ${maxColor - colorVal}, 0.4)`);
+    } else {
+      const normScore = (threshold - score) / threshold;
+      const colorVal = Math.round(maxColor * Math.pow(normScore, 3));
+      el.css('background-color',
+          `rgba(${maxColor - colorVal}, 255, ${maxColor - colorVal}, 0.4)`);
+    }
+  } else {
+    if (origColor !== undefined) el.css('background-color', origColor);
+  }
+}
+
+function updateElementVisibility(el, score, threshold, settings) {
+  const origVisibile = el.attr('data-original-visible');
+  if (origVisibile === undefined) {
+    el.attr('data-original-visible', el.is(':visible'));
+  }
+
+  if ((settings.styling == 'remove') && (score >= threshold)) {        
+    el.hide(100);
+  } else {
+    if ((origVisibile !== undefined) && (origVisibile == "true")) {
+      el.show(100);        
+    }
+  }
 }
 
 // initial run
