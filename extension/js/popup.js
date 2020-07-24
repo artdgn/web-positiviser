@@ -8,7 +8,7 @@ function saveOptions() {
   chrome.storage.sync.set(options, () => void console.log(options));
 }
 
-function udpateFromStored() {
+function updateFromStored() {
   chrome.storage.sync.get({
     styling: 'opacity',
     backend: 'python',
@@ -23,7 +23,7 @@ function udpateFromStored() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  udpateFromStored();
+  updateFromStored();
   for (element of document.getElementsByClassName('stored-options')) {
     element.addEventListener('change', saveOptions);
   }
