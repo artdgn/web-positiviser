@@ -21,6 +21,8 @@ var/
 .installed.cfg
 *.egg
 .idea
+.venv
+.pytest_cache
 
 # Flask stuff:
 instance/

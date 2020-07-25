@@ -5,6 +5,9 @@ const wordPattern = /[a-z]{3,}/ig
 const eps = 0.001
 const maxColor = 200;
 const minOpacity = 0.1;
+const scoredTextsClassName = 'negativityText';
+const scoredTextsValueAtt = 'data-negativity-value';
+const scoredTextsRankAtt = 'data-negativity-rank';
 
 /*
  * text functions
@@ -13,7 +16,7 @@ const minOpacity = 0.1;
 function findTextElements() {
   return $(textNodesSelector).filter((i, element) => {
     const text = extractImmediateText(element);
-    return (countMatches(text, wordPattern) >= 3);
+    return (countMatches(text, wordPattern) >= 4);
   });
 }
 
@@ -70,7 +73,7 @@ function pythonSentimentBackend(elements, callback) {
       console.log(response);
     }
   }).then(data => {
-    setNegativityAttributes(elements, data.values, data.ranks);
+    setNegativityValues(elements, data.values);
     callback();
   }).catch((error) => {
     alert(`Backend call failed: ${error}`);
@@ -83,23 +86,30 @@ function simpleHeuristicBackend(elements, callback) {
   const texts = collectTexts(elements);
   const values = texts.map((text) => 
     countMatches(text, negativesPattern) / countMatches(text, wordPattern));
-  setNegativityAttributes(elements, values, arrayDenseRanks(values));
+  setNegativityValues(elements, values);
   callback();
+}
+
+function setNegativityValues(elements, negValues) {
+  elements.each((i, el) => {
+    $(el).addClass(scoredTextsClassName);
+    $(el).attr(scoredTextsValueAtt, negValues[i]);
+  });
+}
+
+function setNegativityRanks(elements) {
+  const values = $.map(elements, (el) => $(el).attr(scoredTextsValueAtt));
+  const ranks = arrayDenseRanks(values);
+  const maxRank = Math.max.apply(null, ranks);
+  elements.each((i, el) => {
+    $(el).attr(scoredTextsRankAtt, ranks[i] / maxRank); 
+  });
 }
 
 function arrayDenseRanks(arr) {
   const sorted = Array.from(new Set(arr)).sort((a, b) => (a - b));
   const ranks = arr.map((v) => (sorted.indexOf(v) + 1));
   return ranks;
-}
-
-function setNegativityAttributes(elements, negValues, negRanks) {
-  const maxRank = Math.max.apply(null, negRanks);
-  elements.each((i, el) => {
-    $(el).addClass('negativityText');
-    $(el).attr('data-negativity-value', negValues[i]);
-    $(el).attr('data-negativity-rank', negRanks[i] / maxRank);
-  });
 }
 
 /*
@@ -112,33 +122,36 @@ function updateStyleAll() {
     threshold: 0.5,
     ranking: false,
   }, (settings) => {
-    const attrSuffix = settings.ranking ? 'rank': 'value';
+    const scoredTextsSelector = `.${scoredTextsClassName}`
+    const scoredElements = $(scoredTextsSelector);
 
-    const allParents = $(structuralNodesSelector).has('.negativityText');
-    const visitedChildren = new Set();
+    // using ranks or values as scores
+    if (settings.ranking) setNegativityRanks(scoredElements);
+    const scoreAttr = settings.ranking ? scoredTextsRankAtt : scoredTextsValueAtt;
 
     // try to find highest parents of single neg-elements and update them
+    const allParents = $(structuralNodesSelector).has(scoredTextsSelector);
+    const visitedChildren = new Set();
     allParents.each((i, parent) => {
       parent = $(parent);
-      const children = parent.find('.negativityText');
+      const children = parent.find(scoredTextsSelector);
       if (children.length == 1) {
         const onlyChild = children[0];
 
         if (visitedChildren.has(onlyChild)) return; // stop if already visited
         visitedChildren.add(onlyChild);
 
-        const score = parseFloat($(onlyChild).attr(`data-negativity-${attrSuffix}`));
+        const score = parseFloat($(onlyChild).attr(scoreAttr));
         updateElementStyle(parent, score, settings);
       }
     });
 
-    // update all remaining elements that didn't find a single parent
-    const elements = $('.negativityText');
-    elements.each((i, element) => {
+    // update all remaining elements that didn't find a single parent    
+    scoredElements.each((i, element) => {
       if (visitedChildren.has(element)) return; // stop if already visited
 
       element = $(element);      
-      const score = parseFloat(element.attr(`data-negativity-${attrSuffix}`));
+      const score = parseFloat(element.attr(scoreAttr));
       updateElementStyle(element, score, settings);
     });
   });
