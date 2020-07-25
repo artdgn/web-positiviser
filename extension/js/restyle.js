@@ -1,10 +1,14 @@
+// text constants
 const structuralNodesSelector = 'div,tr,nav';
 const textNodesSelector = 
     'h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td';
 const wordPattern = /[a-z]{3,}/ig
+const minNumWords = 5;
+// restyling constants
 const eps = 0.001
 const maxColor = 200;
 const minOpacity = 0.1;
+// scoring constants
 const scoredTextsClassName = 'negativityText';
 const scoredTextsValueAtt = 'data-negativity-value';
 const scoredTextsRankAtt = 'data-negativity-rank';
@@ -16,7 +20,7 @@ const scoredTextsRankAtt = 'data-negativity-rank';
 function findTextElements() {
   return $(textNodesSelector).filter((i, element) => {
     const text = extractImmediateText(element);
-    return (countMatches(text, wordPattern) >= 4);
+    return (countMatches(text, wordPattern) >= minNumWords);
   });
 }
 
@@ -55,29 +59,41 @@ function processTextsByBackend(callback) {
     if (settings.backend == 'simple') {
       simpleHeuristicBackend(elements, callback);
     } else {
-      pythonSentimentBackend(elements, callback);
+      chunkedPythonBackend(elements, callback);
     }
   });
 }
 
-function pythonSentimentBackend(elements, callback) {
-  const texts = collectTexts(elements);
-  fetch('http://localhost:8000/sentiment/', {
+async function chunkedPythonBackend(elements, callback) {
+  const chunkSize = 50;
+  let success = true;
+  let nextStart = 0;
+  while (success && (nextStart < elements.length)) {
+    success = await pythonSentimentBackendCall(
+      elements.slice(nextStart, nextStart + chunkSize), callback);
+    nextStart += chunkSize;
+  }
+}
+
+function pythonSentimentBackendCall(elements, callback) {
+  return fetch('http://localhost:8000/sentiment/', {
     method: 'post',
-    body: JSON.stringify({'texts': texts}),
+    body: JSON.stringify({'texts': collectTexts(elements)}),
   }).then(response => {
     if (response.status === 200) {
       return response.json();
     } else {
-      alert(`Backend returned error: ${response.status}`);
       console.log(response);
+      throw new Error(`Backend returned error: ${response.status}`);
     }
   }).then(data => {
     setNegativityValues(elements, data.values);
     callback();
+    return true; // success
   }).catch((error) => {
     alert(`Backend call failed: ${error}`);
     console.log(error);
+    return false; // failure
   });
 }
 
@@ -132,8 +148,8 @@ function updateStyleAll() {
     // try to find highest parents of single neg-elements and update them
     const allParents = $(structuralNodesSelector).has(scoredTextsSelector);
     const visitedChildren = new Set();
-    allParents.each((i, parent) => {
-      parent = $(parent);
+    allParents.each((i, parent) => {      
+      parent = $(parent);      
       const children = parent.find(scoredTextsSelector);
       if (children.length == 1) {
         const onlyChild = children[0];
@@ -143,6 +159,10 @@ function updateStyleAll() {
 
         const score = parseFloat($(onlyChild).attr(scoreAttr));
         updateElementStyle(parent, score, settings);
+      } else {
+        // in case it was a single parent before (when fewer elements were processed)
+        // but not any longer 
+        resetElementStyle(parent);
       }
     });
 
@@ -163,9 +183,14 @@ function updateElementStyle(element, score, settings) {
   updateElementVisibility(element, score, settings);   
 }
 
+function resetElementStyle(element) {
+  resetOriginalOpacity(element);
+  resetOriginalColor(element);
+  resetOriginalVisility(element);
+}
+
 function updateElementOpacity(element, score, settings) {
-  const origOpacity = element.attr('data-original-opacity');
-  if (origOpacity === undefined) {
+  if (element.attr('data-original-opacity') === undefined) {
     element.attr('data-original-opacity', element.css('opacity'));
   }
 
@@ -174,9 +199,12 @@ function updateElementOpacity(element, score, settings) {
     const normScore = (score - threshold) / (1 - threshold + eps);
     const opacity = 1 - normScore * (1 - minOpacity);
     element.css('opacity', opacity);
-  } else {
-    if (origOpacity !== undefined) element.css('opacity', origOpacity);
-  }
+  } else resetOriginalOpacity(element);
+}
+
+function resetOriginalOpacity(element) {
+  const origOpacity = element.attr('data-original-opacity');
+  if (origOpacity !== undefined) element.css('opacity', origOpacity);
 }
 
 function negativeColorValue(difference, range) {
@@ -185,8 +213,7 @@ function negativeColorValue(difference, range) {
   }
 
 function updateElementColor(element, score, settings) {
-  const origColor = element.attr('data-original-background-color');
-  if (origColor === undefined) {
+  if (element.attr('data-original-background-color') === undefined) {
     element.attr('data-original-background-color', element.css('background-color'));
   }
   
@@ -199,20 +226,27 @@ function updateElementColor(element, score, settings) {
       const colorVal = negativeColorValue(threshold - score, threshold);
       element.css('background-color', `rgba(${colorVal}, 255, ${colorVal}, 0.4)`);
     }
-  } else {
-    if (origColor !== undefined) element.css('background-color', origColor);
-  }
+  } else resetOriginalColor(element);
+}
+
+function resetOriginalColor(element) {
+  const origColor = element.attr('data-original-background-color');
+  if (origColor !== undefined) element.css('background-color', origColor);
 }
 
 function updateElementVisibility(element, score, settings) {
-  const origVisibile = element.attr('data-original-visible');
-  if (origVisibile === undefined) {
+  if (element.attr('data-original-visible') === undefined) {
     element.attr('data-original-visible', element.is(':visible'));
   }
 
   if ((settings.styling == 'remove') && (score >= (settings.threshold))) {        
     element.hide(100);
-  } else if ((origVisibile !== undefined) && (origVisibile == "true")) {
+  } else resetOriginalVisility(element);
+}
+
+function resetOriginalVisility(element) {
+  const origVisibile = element.attr('data-original-visible');
+  if ((origVisibile !== undefined) && (origVisibile == "true")) {
     element.show(100);
   }
 }
