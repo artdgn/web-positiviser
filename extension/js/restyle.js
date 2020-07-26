@@ -51,82 +51,113 @@ function collectTexts(elements) {
  * backend related functions
  */
 
-function processTextsByBackend(callback) {
-  const elements = findTextElements();
-  chrome.storage.sync.get({
-    backend: 'python',
-  }, function(settings) {
-    if (settings.backend == 'simple') {
-      simpleHeuristicBackend(elements, callback);
-    } else {
-      chunkedPythonBackend(elements, callback);
-    }
-  });
+class BackendInterface {
+  static async processElements(elements, valuesCallback) {}
 }
 
-async function chunkedPythonBackend(elements, callback) {
-  const chunkSize = 50;
-  let success = true;
-  let nextStart = 0;
-  while (success && (nextStart < elements.length)) {
-    success = await pythonSentimentBackendCall(
-      elements.slice(nextStart, nextStart + chunkSize), callback);
-    nextStart += chunkSize;
+/**
+ * Updates negativity values using a very simple regex heuristic
+ */
+class NaiveNegativity extends BackendInterface {
+  static negativesPattern = /trump|covid|coronavirus|pandemic/ig;
+
+  static async processElements(elements, valuesCallback) {
+    const texts = collectTexts(elements);
+    const values = texts.map((text) => 
+      countMatches(text, this.negativesPattern) / countMatches(text, wordPattern));
+    valuesCallback(elements, values);
   }
 }
 
-function pythonSentimentBackendCall(elements, callback) {
-  return fetch('http://localhost:8000/sentiment/', {
-    method: 'post',
-    body: JSON.stringify({'texts': collectTexts(elements)}),
-  }).then(response => {
-    if (response.status === 200) {
-      return response.json();
-    } else {
-      console.log(response);
-      throw new Error(`Backend returned error: ${response.status}`);
+/**
+ * Updates negativity values using the python backend service
+ */
+class PythonBackendNegativity extends BackendInterface {
+  static address = 'http://localhost:8000/sentiment/';
+  static chunkSize = 50;
+
+  static async processElements(elements, valuesCallback) {
+    let start = 0;
+    let chunkElements;
+    let chunkValues;
+    while (start < elements.length) {
+      chunkElements = elements.slice(start, start + this.chunkSize);
+      chunkValues = await this.singleCallPromise_(collectTexts(chunkElements));
+      if (chunkValues) {
+        valuesCallback(chunkElements, chunkValues);
+      } else break;
+      start += this.chunkSize;
     }
-  }).then(data => {
-    setNegativityValues(elements, data.values);
-    callback();
-    return true; // success
-  }).catch((error) => {
-    alert(`Backend call failed: ${error}`);
-    console.log(error);
-    return false; // failure
-  });
+  }
+  
+  static async singleCallPromise_(texts) {
+    try {
+      const response = await fetch(this.address, {
+        method: 'post',
+        body: JSON.stringify({'texts': texts}),
+      });
+
+      if (response.status === 200) {
+        const data = await response.json();
+        return data.values;
+      } else {
+        console.log(response);
+        throw new Error(`Backend returned error: ${response.status}`);
+      }
+    }
+    catch (error) {
+      alert(`PythonBackendNegativity call failed: ${error}`);
+      console.log(error);
+    }
+  }
 }
 
-function simpleHeuristicBackend(elements, callback) {
-  const negativesPattern = /trump|covid|coronavirus|pandemic/ig;
-  const texts = collectTexts(elements);
-  const values = texts.map((text) => 
-    countMatches(text, negativesPattern) / countMatches(text, wordPattern));
-  setNegativityValues(elements, values);
-  callback();
+/**
+ * Processes and updates negativity data for elements
+ */
+class NegativityProcessor {  
+
+  static backends = {
+    'simple': NaiveNegativity,
+    'python': PythonBackendNegativity,
+  }
+
+  static processAll(restyleCallback) {
+    chrome.storage.sync.get({
+      backend: 'python',
+    }, (settings) => {
+      this.backends[settings.backend].processElements(
+          findTextElements(), 
+          (elements, values) => {
+            this.setNegativityValues_(elements, values);
+            restyleCallback();
+          });
+    });
+  }
+
+  static updateNegativityRanks(elements) {
+    const values = $.map(elements, (el) => $(el).attr(scoredTextsValueAtt));
+    const ranks = this.arrayDenseRanks_(values);
+    const maxRank = Math.max.apply(null, ranks);
+    elements.each((i, el) => {
+      $(el).attr(scoredTextsRankAtt, ranks[i] / maxRank); 
+    });
+  }
+
+  static setNegativityValues_(elements, values) {
+    elements.each((i, el) => {
+      $(el).addClass(scoredTextsClassName);
+      $(el).attr(scoredTextsValueAtt, values[i]);
+    });
+  }
+  
+  static arrayDenseRanks_(arr) {
+    const sorted = Array.from(new Set(arr)).sort((a, b) => (a - b));
+    const ranks = arr.map((v) => (sorted.indexOf(v) + 1));
+    return ranks;
+  }
 }
 
-function setNegativityValues(elements, negValues) {
-  elements.each((i, el) => {
-    $(el).addClass(scoredTextsClassName);
-    $(el).attr(scoredTextsValueAtt, negValues[i]);
-  });
-}
-
-function setNegativityRanks(elements) {
-  const values = $.map(elements, (el) => $(el).attr(scoredTextsValueAtt));
-  const ranks = arrayDenseRanks(values);
-  const maxRank = Math.max.apply(null, ranks);
-  elements.each((i, el) => {
-    $(el).attr(scoredTextsRankAtt, ranks[i] / maxRank); 
-  });
-}
-
-function arrayDenseRanks(arr) {
-  const sorted = Array.from(new Set(arr)).sort((a, b) => (a - b));
-  const ranks = arr.map((v) => (sorted.indexOf(v) + 1));
-  return ranks;
-}
 
 /*
  * styling functions
@@ -142,7 +173,7 @@ function updateStyleAll() {
     const scoredElements = $(scoredTextsSelector);
 
     // using ranks or values as scores
-    if (settings.ranking) setNegativityRanks(scoredElements);
+    if (settings.ranking) NegativityProcessor.updateNegativityRanks(scoredElements);
     const scoreAttr = settings.ranking ? scoredTextsRankAtt : scoredTextsValueAtt;
 
     // try to find highest parents of single neg-elements and update them
@@ -256,13 +287,13 @@ function resetOriginalVisility(element) {
  */
 
 // initial run
-processTextsByBackend(updateStyleAll);
+NegativityProcessor.processAll(updateStyleAll);
 
 // watch for option changes
 chrome.storage.onChanged.addListener((changes) => {
   console.log(changes);
   if (changes.backend != null) {
-    processTextsByBackend(updateStyleAll);
+    NegativityProcessor.processAll(updateStyleAll);
   } else {
     updateStyleAll();
   }
@@ -275,7 +306,7 @@ const observer = new MutationObserver((mutationsList, observer) => {
     added += mutation.addedNodes.length;
   }
   if (added >= 20) {
-    processTextsByBackend(updateStyleAll);
+    NegativityProcessor.processAll(updateStyleAll);
     added = 0;
   }
 });
