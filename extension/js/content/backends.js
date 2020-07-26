@@ -40,7 +40,7 @@ class PythonBackendNegativity extends BackendBase {
     let chunkValues;
     while (start < elements.length) {
       chunkElements = elements.slice(start, start + this.chunkSize);
-      chunkValues = await this.singleCallPromise_(this.collectTexts_(chunkElements));
+      chunkValues = await this.singleCallPromise_(chunkElements);
       if (chunkValues) {
         chunkCallback(chunkElements, chunkValues);
       } else break;
@@ -48,11 +48,11 @@ class PythonBackendNegativity extends BackendBase {
     }
   }
   
-  static async singleCallPromise_(texts) {
+  static async singleCallPromise_(elements) {
     try {
       const response = await fetch(this.address, {
         method: 'post',
-        body: JSON.stringify({'texts': texts}),
+        body: JSON.stringify({'texts': this.collectTexts_(elements)}),
       });
 
       if (response.status === 200) {
@@ -75,7 +75,7 @@ class PythonBackendNegativity extends BackendBase {
  */
 class NegativityCalculator { 
   static textNodesSelector = 
-    'h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td'; 
+    'div,h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td'; 
   static minNumWords = 5;
 
   static backends = {
@@ -88,23 +88,19 @@ class NegativityCalculator {
       backend: 'python',
     }, (settings) => {
       const allElements = this.findTextElements_();
-      this.backends[settings.backend].processElements(
-          allElements, 
-          (chunkElements, chunkValues) => {
-            this.setNegativityValues_(chunkElements, chunkValues);
-            // update all ranks for all elements
-            this.updateNegativityRanks_(allElements);
-            restyleCallback();
-          });
-    });
-  }
-
-  static updateNegativityRanks_(elements) {
-    const values = $.map(elements, (el) => $(el).attr(scoredTextsValueAtt));
-    const ranks = this.arrayDenseRanks_(values);
-    const maxRank = Math.max.apply(null, ranks);
-    elements.each((i, el) => {
-      $(el).attr(scoredTextsRankAtt, ranks[i] / maxRank); 
+      this.removeAllValues_(allElements);
+      if (settings.backend === 'off') {
+        restyleCallback();
+      } else {
+        this.backends[settings.backend].processElements(
+            allElements, 
+            (chunkElements, chunkValues) => {
+              this.setNegativityValues_(chunkElements, chunkValues);
+              // update all ranks for all elements
+              this.updateNegativityRanks_(allElements);
+              restyleCallback();
+            });
+      }
     });
   }
 
@@ -121,7 +117,24 @@ class NegativityCalculator {
       $(el).attr(scoredTextsValueAtt, values[i]);
     });
   }
-  
+
+  static updateNegativityRanks_(elements) {
+    const values = $.map(elements, (el) => $(el).attr(scoredTextsValueAtt));
+    const ranks = this.arrayDenseRanks_(values);
+    const maxRank = Math.max.apply(null, ranks);
+    elements.each((i, el) => {
+      $(el).attr(scoredTextsRankAtt, ranks[i] / maxRank); 
+    });
+  }
+
+  static removeAllValues_(elements) {
+    elements.each((i, el) => {
+      $(el).removeClass(scoredTextsClassName);
+      $(el).removeAttr(scoredTextsValueAtt);
+      $(el).removeAttr(scoredTextsRankAtt);
+    });
+  }
+
   static arrayDenseRanks_(arr) {
     const sorted = Array.from(new Set(arr)).sort((a, b) => (a - b));
     const ranks = arr.map((v) => (sorted.indexOf(v) + 1));
