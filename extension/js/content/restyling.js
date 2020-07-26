@@ -15,6 +15,7 @@ class Restyler {
         styling: 'opacity',
         threshold: 0.5,
         ranking: false,
+        onlyTexts: false,
       }, (settings) => {
         const scoreAttr = settings.ranking ? scoredTextsRankAtt : scoredTextsValueAtt;
 
@@ -22,17 +23,18 @@ class Restyler {
         const scoredElements = $(this.scoredTextsSelector);    
         const allParents = $(this.structuralNodesSelector).has(this.scoredTextsSelector);
 
-        // try to find highest parents of single neg-elements and update them        
+        // try to find highest parents of single neg-elements and update them  
         const visitedChildren = new Set();
-        allParents.each((i, parent) => {      
-          parent = $(parent);      
-          const children = parent.find(this.scoredTextsSelector);
-          if (children.length == 1) {
+        allParents.each((i, parent) => {   
+          const children = $(parent).find(this.scoredTextsSelector);
+          if ((children.length == 1) && !settings.onlyTexts) {
             const onlyChild = children[0];
     
             if (visitedChildren.has(onlyChild)) return; // stop if already visited
+
             visitedChildren.add(onlyChild);
-    
+            this.resetElementStyle_(onlyChild); // in case it was restyled as child before
+
             const score = parseFloat($(onlyChild).attr(scoreAttr));
             this.updateElementStyle_(parent, score, settings);
           } else {
@@ -45,8 +47,7 @@ class Restyler {
         // update all remaining elements that didn't find a single parent    
         scoredElements.each((i, element) => {
           if (!visitedChildren.has(element)) {
-            element = $(element);      
-            const score = parseFloat(element.attr(scoreAttr));
+            const score = parseFloat($(element).attr(scoreAttr));
             this.updateElementStyle_(element, score, settings);
           }
         });
@@ -54,12 +55,14 @@ class Restyler {
     }
   
     static updateElementStyle_(element, score, settings) {
+      element = $(element);
       this.updateElementOpacity_(element, score, settings);
       this.updateElementColor_(element, score, settings);
       this.updateElementVisibility_(element, score, settings);   
     }
     
     static resetElementStyle_(element) {
+      element = $(element);
       this.resetOriginalOpacity_(element);
       this.resetOriginalColor_(element);
       this.resetOriginalVisility_(element);
