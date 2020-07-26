@@ -13,7 +13,13 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*", "file://*/*"],
-      "js": ["js/jquery-3.1.1.min.js", "js/restyle.js"],
+      "js": [
+        "js/jquery-3.1.1.min.js", 
+        "js/content/common.js",
+        "js/content/backends.js",
+        "js/content/restyling.js",
+        "js/content/main.js"
+      ],
       "run_at": "document_idle",
       "all_frames": false
     }
