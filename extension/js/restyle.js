@@ -1,14 +1,6 @@
-// text constants
-const structuralNodesSelector = 'div,tr,nav';
-const textNodesSelector = 
-    'h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td';
+// common constants
 const wordPattern = /[a-z]{3,}/ig
-const minNumWords = 5;
-// restyling constants
-const eps = 0.001
-const maxColor = 200;
-const minOpacity = 0.1;
-// scoring constants
+// persistence constants
 const scoredTextsClassName = 'negativityText';
 const scoredTextsValueAtt = 'data-negativity-value';
 const scoredTextsRankAtt = 'data-negativity-rank';
@@ -16,14 +8,6 @@ const scoredTextsRankAtt = 'data-negativity-rank';
 /*
  * text functions
  */
-
-function findTextElements() {
-  return $(textNodesSelector).filter((i, element) => {
-    const text = extractImmediateText(element);
-    return (countMatches(text, wordPattern) >= minNumWords);
-  });
-}
-
 function countMatches(text, pattern) {
   const matches = text.match(pattern);
   return matches ? matches.length : 0;
@@ -31,38 +15,34 @@ function countMatches(text, pattern) {
 
 function extractImmediateText(element) {
   element = $(element);
-
   let text = element.contents().not(element.children()).text();
-
   // handle img tags
   text = text || `${element.attr('alt') || ''}`;
-
   // handle a tags  
-  text = text || `${element.attr('label') || ''} ${element.attr('title') || ''}`
-  
+  text = text || `${element.attr('label') || ''} ${element.attr('title') || ''}`  
   return text;
 }
 
-function collectTexts(elements) {
-  return $.map(elements, (el) => extractImmediateText(el));
-}
-
 /*
- * backend related functions
+ * backend functions
  */
 
-class BackendInterface {
+class BackendBase {
   static async processElements(elements, valuesCallback) {}
+
+  static collectTexts_(elements) {
+    return $.map(elements, (el) => extractImmediateText(el));
+  }
 }
 
 /**
  * Updates negativity values using a very simple regex heuristic
  */
-class NaiveNegativity extends BackendInterface {
+class NaiveNegativity extends BackendBase {
   static negativesPattern = /trump|covid|coronavirus|pandemic/ig;
 
   static async processElements(elements, valuesCallback) {
-    const texts = collectTexts(elements);
+    const texts = this.collectTexts_(elements);
     const values = texts.map((text) => 
       countMatches(text, this.negativesPattern) / countMatches(text, wordPattern));
     valuesCallback(elements, values);
@@ -72,7 +52,7 @@ class NaiveNegativity extends BackendInterface {
 /**
  * Updates negativity values using the python backend service
  */
-class PythonBackendNegativity extends BackendInterface {
+class PythonBackendNegativity extends BackendBase {
   static address = 'http://localhost:8000/sentiment/';
   static chunkSize = 50;
 
@@ -82,7 +62,7 @@ class PythonBackendNegativity extends BackendInterface {
     let chunkValues;
     while (start < elements.length) {
       chunkElements = elements.slice(start, start + this.chunkSize);
-      chunkValues = await this.singleCallPromise_(collectTexts(chunkElements));
+      chunkValues = await this.singleCallPromise_(this.collectTexts_(chunkElements));
       if (chunkValues) {
         valuesCallback(chunkElements, chunkValues);
       } else break;
@@ -115,7 +95,10 @@ class PythonBackendNegativity extends BackendInterface {
 /**
  * Processes and updates negativity data for elements
  */
-class NegativityProcessor {  
+class NegativityProcessor { 
+  static textNodesSelector = 
+    'h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td'; 
+  static minNumWords = 5;
 
   static backends = {
     'simple': NaiveNegativity,
@@ -127,7 +110,7 @@ class NegativityProcessor {
       backend: 'python',
     }, (settings) => {
       this.backends[settings.backend].processElements(
-          findTextElements(), 
+          this.findTextElements_(), 
           (elements, values) => {
             this.setNegativityValues_(elements, values);
             restyleCallback();
@@ -141,6 +124,13 @@ class NegativityProcessor {
     const maxRank = Math.max.apply(null, ranks);
     elements.each((i, el) => {
       $(el).attr(scoredTextsRankAtt, ranks[i] / maxRank); 
+    });
+  }
+
+  static findTextElements_() {
+    return $(this.textNodesSelector).filter((i, element) => {
+      const text = extractImmediateText(element);
+      return (countMatches(text, wordPattern) >= this.minNumWords);
     });
   }
 
@@ -162,123 +152,132 @@ class NegativityProcessor {
 /*
  * styling functions
  */
+class Restyler {
+  static structuralNodesSelector = 'div,tr,nav';
+  static eps = 0.001
+  static maxColor = 200;
+  static minOpacity = 0.1;
+  static scoredTextsSelector = `.${scoredTextsClassName}`
 
-function updateStyleAll() {
-  chrome.storage.sync.get({
-    styling: 'opacity',
-    threshold: 0.5,
-    ranking: false,
-  }, (settings) => {
-    const scoredTextsSelector = `.${scoredTextsClassName}`
-    const scoredElements = $(scoredTextsSelector);
-
-    // using ranks or values as scores
-    if (settings.ranking) NegativityProcessor.updateNegativityRanks(scoredElements);
-    const scoreAttr = settings.ranking ? scoredTextsRankAtt : scoredTextsValueAtt;
-
-    // try to find highest parents of single neg-elements and update them
-    const allParents = $(structuralNodesSelector).has(scoredTextsSelector);
-    const visitedChildren = new Set();
-    allParents.each((i, parent) => {      
-      parent = $(parent);      
-      const children = parent.find(scoredTextsSelector);
-      if (children.length == 1) {
-        const onlyChild = children[0];
-
-        if (visitedChildren.has(onlyChild)) return; // stop if already visited
-        visitedChildren.add(onlyChild);
-
-        const score = parseFloat($(onlyChild).attr(scoreAttr));
-        updateElementStyle(parent, score, settings);
-      } else {
-        // in case it was a single parent before (when fewer elements were processed)
-        // but not any longer 
-        resetElementStyle(parent);
+  static updateAll() {
+    chrome.storage.sync.get({
+      styling: 'opacity',
+      threshold: 0.5,
+      ranking: false,
+    }, (settings) => {
+      const scoredElements = $(this.scoredTextsSelector);
+  
+      // using ranks or values as scores
+      if (settings.ranking) {
+        NegativityProcessor.updateNegativityRanks(scoredElements);
       }
+      const scoreAttr = settings.ranking ? scoredTextsRankAtt : scoredTextsValueAtt;
+  
+      // try to find highest parents of single neg-elements and update them
+      const allParents = $(this.structuralNodesSelector).has(this.scoredTextsSelector);
+      const visitedChildren = new Set();
+      allParents.each((i, parent) => {      
+        parent = $(parent);      
+        const children = parent.find(this.scoredTextsSelector);
+        if (children.length == 1) {
+          const onlyChild = children[0];
+  
+          if (visitedChildren.has(onlyChild)) return; // stop if already visited
+          visitedChildren.add(onlyChild);
+  
+          const score = parseFloat($(onlyChild).attr(scoreAttr));
+          this.updateElementStyle_(parent, score, settings);
+        } else {
+          // in case it was a single parent before (when fewer elements were processed)
+          // but not any longer 
+          this.resetElementStyle_(parent);
+        }
+      });
+  
+      // update all remaining elements that didn't find a single parent    
+      scoredElements.each((i, element) => {
+        if (!visitedChildren.has(element)) {
+          element = $(element);      
+          const score = parseFloat(element.attr(scoreAttr));
+          this.updateElementStyle_(element, score, settings);
+        }
+      });
     });
-
-    // update all remaining elements that didn't find a single parent    
-    scoredElements.each((i, element) => {
-      if (visitedChildren.has(element)) return; // stop if already visited
-
-      element = $(element);      
-      const score = parseFloat(element.attr(scoreAttr));
-      updateElementStyle(element, score, settings);
-    });
-  });
-}
-
-function updateElementStyle(element, score, settings) {
-  updateElementOpacity(element, score, settings);
-  updateElementColor(element, score, settings);
-  updateElementVisibility(element, score, settings);   
-}
-
-function resetElementStyle(element) {
-  resetOriginalOpacity(element);
-  resetOriginalColor(element);
-  resetOriginalVisility(element);
-}
-
-function updateElementOpacity(element, score, settings) {
-  if (element.attr('data-original-opacity') === undefined) {
-    element.attr('data-original-opacity', element.css('opacity'));
   }
 
-  const threshold = settings.threshold;
-  if ((settings.styling == 'opacity') && (score >= threshold)) {
-    const normScore = (score - threshold) / (1 - threshold + eps);
-    const opacity = 1 - normScore * (1 - minOpacity);
-    element.css('opacity', opacity);
-  } else resetOriginalOpacity(element);
-}
-
-function resetOriginalOpacity(element) {
-  const origOpacity = element.attr('data-original-opacity');
-  if (origOpacity !== undefined) element.css('opacity', origOpacity);
-}
-
-function negativeColorValue(difference, range) {
-    const normValue = Math.round(maxColor * Math.pow(difference / (range + eps), 3));
-    return maxColor - normValue;
-  }
-
-function updateElementColor(element, score, settings) {
-  if (element.attr('data-original-background-color') === undefined) {
-    element.attr('data-original-background-color', element.css('background-color'));
+  static updateElementStyle_(element, score, settings) {
+    this.updateElementOpacity_(element, score, settings);
+    this.updateElementColor_(element, score, settings);
+    this.updateElementVisibility_(element, score, settings);   
   }
   
-  const threshold = settings.threshold;  
-  if (settings.styling == 'color') {
-    if (score >= threshold) {
-      const colorVal = negativeColorValue(score - threshold, 1 - threshold);
-      element.css('background-color', `rgba(255, ${colorVal}, ${colorVal}, 0.4)`);
-    } else {
-      const colorVal = negativeColorValue(threshold - score, threshold);
-      element.css('background-color', `rgba(${colorVal}, 255, ${colorVal}, 0.4)`);
-    }
-  } else resetOriginalColor(element);
-}
-
-function resetOriginalColor(element) {
-  const origColor = element.attr('data-original-background-color');
-  if (origColor !== undefined) element.css('background-color', origColor);
-}
-
-function updateElementVisibility(element, score, settings) {
-  if (element.attr('data-original-visible') === undefined) {
-    element.attr('data-original-visible', element.is(':visible'));
+  static resetElementStyle_(element) {
+    this.resetOriginalOpacity_(element);
+    this.resetOriginalColor_(element);
+    this.resetOriginalVisility_(element);
   }
-
-  if ((settings.styling == 'remove') && (score >= (settings.threshold))) {        
-    element.hide(100);
-  } else resetOriginalVisility(element);
-}
-
-function resetOriginalVisility(element) {
-  const origVisibile = element.attr('data-original-visible');
-  if ((origVisibile !== undefined) && (origVisibile == "true")) {
-    element.show(100);
+  
+  static updateElementOpacity_(element, score, settings) {
+    if (element.attr('data-original-opacity') === undefined) {
+      element.attr('data-original-opacity', element.css('opacity'));
+    }
+  
+    const threshold = settings.threshold;
+    if ((settings.styling == 'opacity') && (score >= threshold)) {
+      const normScore = (score - threshold) / (1 - threshold + this.eps);
+      const opacity = 1 - normScore * (1 - this.minOpacity);
+      element.css('opacity', opacity);
+    } else this.resetOriginalOpacity_(element);
+  }
+  
+  static resetOriginalOpacity_(element) {
+    const origOpacity = element.attr('data-original-opacity');
+    if (origOpacity !== undefined) element.css('opacity', origOpacity);
+  }
+  
+  static negativeColorValue_(difference, range) {
+      const normValue = Math.round(
+          this.maxColor * Math.pow(difference / (range + this.eps), 3));
+      return this.maxColor - normValue;
+  }
+  
+  static updateElementColor_(element, score, settings) {
+    if (element.attr('data-original-background-color') === undefined) {
+      element.attr('data-original-background-color', element.css('background-color'));
+    }
+    
+    const threshold = settings.threshold;  
+    if (settings.styling == 'color') {
+      if (score >= threshold) {
+        const colorVal = this.negativeColorValue_(score - threshold, 1 - threshold);
+        element.css('background-color', `rgba(255, ${colorVal}, ${colorVal}, 0.4)`);
+      } else {
+        const colorVal = this.negativeColorValue_(threshold - score, threshold);
+        element.css('background-color', `rgba(${colorVal}, 255, ${colorVal}, 0.4)`);
+      }
+    } else this.resetOriginalColor_(element);
+  }
+  
+  static resetOriginalColor_(element) {
+    const origColor = element.attr('data-original-background-color');
+    if (origColor !== undefined) element.css('background-color', origColor);
+  }
+  
+  static updateElementVisibility_(element, score, settings) {
+    if (element.attr('data-original-visible') === undefined) {
+      element.attr('data-original-visible', element.is(':visible'));
+    }
+  
+    if ((settings.styling == 'remove') && (score >= (settings.threshold))) {        
+      element.hide(100);
+    } else this.resetOriginalVisility_(element);
+  }
+  
+  static resetOriginalVisility_(element) {
+    const origVisibile = element.attr('data-original-visible');
+    if ((origVisibile !== undefined) && (origVisibile == "true")) {
+      element.show(100);
+    }
   }
 }
 
@@ -287,15 +286,15 @@ function resetOriginalVisility(element) {
  */
 
 // initial run
-NegativityProcessor.processAll(updateStyleAll);
+NegativityProcessor.processAll(() => Restyler.updateAll());
 
 // watch for option changes
 chrome.storage.onChanged.addListener((changes) => {
   console.log(changes);
   if (changes.backend != null) {
-    NegativityProcessor.processAll(updateStyleAll);
+    NegativityProcessor.processAll(() => Restyler.updateAll());
   } else {
-    updateStyleAll();
+    Restyler.updateAll();
   }
 });
 
@@ -306,7 +305,7 @@ const observer = new MutationObserver((mutationsList, observer) => {
     added += mutation.addedNodes.length;
   }
   if (added >= 20) {
-    NegativityProcessor.processAll(updateStyleAll);
+    NegativityProcessor.processAll(() => Restyler.updateAll());
     added = 0;
   }
 });
