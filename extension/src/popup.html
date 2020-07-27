@@ -1,0 +1,65 @@
+<!--
+Allows user to adjust filtration settings.
+ -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Options</title>
+    <link rel="stylesheet" href="./popup/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div id="options">
+        <div id="title">
+          <span>Options</span>
+        </div>
+        <div class="option-row" title="Choose how to alter negative&#013;items' visibility">
+          <label for="selected-styling">Styling mode</label>
+          <select id="selected-styling" class="stored-options">
+            <option value="opacity">&nbspTransparency&nbsp</option>
+            <option value="color">&nbspColors&nbsp</option>
+            <option value="remove">&nbspRemove&nbsp</option>
+          </select>
+        </div>
+
+        <div class="option-row" title="Increase to show more / Decrease for less">
+          <label for="selected-threshold">Negativity tolerance</label>
+          <input
+            class="slider stored-options"
+            id="selected-threshold"
+            type="range"
+            min="0"
+            max="100"
+            value="50"
+          />
+        </div>
+
+        <div
+          class="option-row"
+          title="Toggle to use relative sensitivity&#013;(e.g. set threshold to 20% to show only 20%)"
+        >
+          <label for="selected-ranking-check">Use percentage values</label>
+          <input class="stored-options" type="checkbox" id="selected-ranking-check" />
+        </div>
+
+        <div
+          class="option-row"
+          title="Toggle to restyle only texts elements&#013; themselves and not their highest container"
+        >
+          <label for="selected-onlytexts-check">Only text elements</label>
+          <input class="stored-options" type="checkbox" id="selected-onlytexts-check" />
+        </div>
+
+        <div class="option-row" title="How to calculate negativity values">
+          <label for="selected-backend">Calculation</label>
+          <select id="selected-backend" class="stored-options">
+            <option value="python">&nbspPython&nbsp</option>
+            <option value="simple">&nbspJS-Stub&nbsp</option>
+            <option value="off">&nbspOff&nbsp</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <script src="./popup/popup.js"></script>
+  </body>
+</html>

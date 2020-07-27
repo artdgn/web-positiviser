@@ -1,0 +1,25 @@
+{
+  "name": "negativity-balancer",
+  "version": "0.1.0",
+  "description": "Using sentiment analysis to reduce bad news visibility.",
+  "scripts": {
+    "prebuild": "rm -rf dist .cache",
+    "start": "NODE_ENV=development parcel watch src/background.js src/popup.html src/content-script.js --no-hmr",
+    "build": "NODE_ENV=production parcel build src/background.js src/popup.html src/content-script.js && zip -9 -r negativity-balancer.zip dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-static-files-copy": "^2.4.3",
+    "prettier": "^2.0.5"
+  },
+  "dependencies": {
+    "jquery": "^3.5.1",
+    "sentiment": "^5.0.2"
+  },
+  "browserslist": [
+    "last 2 Chrome versions"
+  ]
+}

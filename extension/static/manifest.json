@@ -3,35 +3,27 @@
   "name": "Negativity Balancer",
   "version": "0.1.0",
   "description": "Using sentiment analysis to reduce bad news visibility.",
-  "browser_action" :
-  {
-    "default_icon" : "images/icon.png",
-    "default_title" : "Negativity Balancer",
+  "browser_action": {
+    "default_icon": "images/icon.png",
+    "default_title": "Negativity Balancer",
     "default_popup": "popup.html"
   },
   "permissions": ["storage", "http://localhost/*"],
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*", "file://*/*"],
-      "js": [
-        "js/jquery-3.1.1.min.js", 
-        "js/content/common.js",
-        "js/content/backends.js",
-        "js/content/restyling.js",
-        "js/content/main.js"
-      ],
+      "js": ["content-script.js"],
       "run_at": "document_idle",
       "all_frames": false
     }
   ],
   "background": {
-    "scripts": ["js/background.js"]
+    "scripts": ["background.js"]
   },
   "content_security_policy": "script-src 'self'; object-src 'self'",
   "browser_specific_settings": {
     "gecko": {
       "id": "negativitybalancer@artdgn.github"
     }
-}
-
+  }
 }

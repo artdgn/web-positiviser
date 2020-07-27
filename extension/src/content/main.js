@@ -1,7 +1,5 @@
-/**
- * sadly, imports cannot be used, so these "scripts" share a common context.
- * This script assumes that backends.js, restyling.js ran before it.
- */
+import NegativityCalculator from './backends';
+import Restyler from './restyling';
 
 // initial run
 NegativityCalculator.updateAll(() => Restyler.updateAll());
@@ -27,5 +25,4 @@ const observer = new MutationObserver((mutationsList) => {
     added = 0;
   }
 });
-observer.observe(
-    document.body, {attributes: false, childList: true, subtree: true});
+observer.observe(document.body, { attributes: false, childList: true, subtree: true });

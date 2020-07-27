@@ -1,0 +1,38 @@
+body {
+  width: 20rem;
+  margin: 0;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  font-size: 1.25rem;
+  background-color: #f2f2ff;
+  color: #382381;
+  border: 2px #183578;
+}
+#title {
+  padding-top: 0.3rem;
+  padding-bottom: 0.7rem;
+  font-size: 1.75rem;
+  font-weight: bold;
+  text-align: center;
+}
+.option-row {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  margin-top: 0.5rem;
+}
+input[type='range'] {
+  width: 100%;
+}
+input[type='checkbox'] {
+  transform: scale(1.5);
+}
+select {
+  width: 50%;
+  font-size: 1.25rem;
+  text-align: center;
+  background-color: #f2f2ff;
+}

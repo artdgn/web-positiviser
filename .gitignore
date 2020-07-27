@@ -42,3 +42,7 @@ data/*
 
 # temp files
 *.*~
+
+# dependencies
+node_modules
+.cache
