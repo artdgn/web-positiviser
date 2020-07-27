@@ -83,8 +83,12 @@ class PythonBackendNegativity extends BackendBase {
  * Processes and updates negativity data for elements
  */
 export default class NegativityCalculator {
-  static textNodesSelector = 'div,h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td';
+  // constants
+  static textNodesSelector =
+    'div,h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td';
   static minNumWords = 5;
+  // state
+  static stats;
 
   static backends = {
     simple: NaiveNegativity,
@@ -92,28 +96,26 @@ export default class NegativityCalculator {
   };
 
   static updateAll(restyleCallback) {
-    chrome.storage.sync.get(
-      {
-        backend: 'python',
-      },
-      (settings) => {
-        const allElements = this.findTextElements_();
-        this.removeAllValues_(allElements);
-        if (settings.backend === 'off') {
-          restyleCallback();
-        } else {
-          this.backends[settings.backend].processElements(
+    chrome.storage.sync.get({
+      backend: 'python',
+    }, (settings) => {
+      const allElements = this.findTextElements_();
+      this.removeAllValues_(allElements);
+      if (settings.backend !== 'off') {
+        this.backends[settings.backend].processElements(
             allElements,
             (chunkElements, chunkValues) => {
               this.setNegativityValues_(chunkElements, chunkValues);
               // update all ranks for all elements
               this.updateNegativityRanks_(allElements);
+              this.stats = this.calculateStats_(allElements);
               restyleCallback();
-            }
-          );
-        }
+            });
+      } else {
+        this.stats = {};
+        restyleCallback(); // backend == off
       }
-    );
+    });
   }
 
   static findTextElements_() {
@@ -131,8 +133,7 @@ export default class NegativityCalculator {
   }
 
   static updateNegativityRanks_(elements) {
-    const values = $.map(elements, (el) => $(el).attr(scoredTextsValueAtt));
-    const ranks = this.arrayDenseRanks_(values);
+    const ranks = this.arrayDenseRanks_(this.negativityValues_(elements));
     const maxRank = Math.max.apply(null, ranks);
     elements.each((i, el) => {
       $(el).attr(scoredTextsRankAtt, ranks[i] / maxRank);
@@ -147,9 +148,21 @@ export default class NegativityCalculator {
     });
   }
 
+  static negativityValues_(elements) {
+    return $.map(elements, (el) => parseFloat($(el).attr(scoredTextsValueAtt)));
+  }
+
   static arrayDenseRanks_(arr) {
     const sorted = Array.from(new Set(arr)).sort((a, b) => a - b);
     const ranks = arr.map((v) => sorted.indexOf(v) + 1);
     return ranks;
+  }
+
+  static calculateStats_(elements) {
+    const values = this.negativityValues_(elements);
+    return {
+      negatives: values.filter((v) => v > 0.5).length,
+      total: values.length,
+    }
   }
 }

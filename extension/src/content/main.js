@@ -1,16 +1,22 @@
 import NegativityCalculator from './backends';
 import Restyler from './restyling';
 
+function restyleCallback() {
+  Restyler.updateAll();
+  chrome.runtime.sendMessage(
+    {type: 'statsUpdate', stats: NegativityCalculator.stats});
+}
+
 // initial run
-NegativityCalculator.updateAll(() => Restyler.updateAll());
+NegativityCalculator.updateAll(restyleCallback);
 
 // watch for option changes
 chrome.storage.onChanged.addListener((changes) => {
   console.log(changes);
   if (changes.backend != null) {
-    NegativityCalculator.updateAll(() => Restyler.updateAll());
+    NegativityCalculator.updateAll(restyleCallback);
   } else {
-    Restyler.updateAll();
+    restyleCallback();
   }
 });
 
@@ -21,7 +27,7 @@ const observer = new MutationObserver((mutationsList) => {
     added += mutation.addedNodes.length;
   }
   if (added >= 20) {
-    NegativityCalculator.updateAll(() => Restyler.updateAll());
+    NegativityCalculator.updateAll(restyleCallback);
     added = 0;
   }
 });

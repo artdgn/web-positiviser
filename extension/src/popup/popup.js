@@ -23,7 +23,7 @@ function updateFromStored() {
       document.getElementById('selected-backend').value = stored.backend;
       document.getElementById('selected-threshold').value = Math.round(stored.threshold * 100);
       document.getElementById('selected-ranking-check').checked = stored.ranking;
-      document.getElementById('selected-onlyTexts-check').checked = stored.onlyTexts;
+      document.getElementById('selected-onlytexts-check').checked = stored.onlyTexts;
     }
   );
 }
