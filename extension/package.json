@@ -17,7 +17,8 @@
   },
   "dependencies": {
     "jquery": "^3.5.1",
-    "sentiment": "^5.0.2"
+    "sentiment": "^5.0.2",
+    "vader-sentiment": "^1.1.3"
   },
   "browserslist": [
     "last 2 Chrome versions"
