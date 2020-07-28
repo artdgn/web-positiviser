@@ -1,5 +1,7 @@
 import $ from 'jquery';
-import Sentiment from 'sentiment';
+import AFINNSentiment from 'sentiment';
+import {SentimentIntensityAnalyzer as VaderAnalyser} from 'vader-sentiment/src/vaderSentiment.js';
+import {lexicon as vaderLexicon} from 'vader-sentiment/src/vader_lexicon.js';
 
 import {
   scoredTextsClassName,
@@ -8,9 +10,6 @@ import {
   countMatches,
   extractElementText,
 } from './common';
-
-// uncomment to use sentiment library
-// const sentiment = new Sentiment();
 
 const wordPattern = /[a-z]{3,}/gi;
 
@@ -23,15 +22,60 @@ class BackendBase {
 }
 
 /**
- * Updates negativity values using a very simple regex heuristic
+ * Updates negativity values using https://github.com/thisandagain/sentiment
  */
-class NaiveNegativity extends BackendBase {
-  static negativesPattern = /trump|covid|coronavirus|pandemic/gi;
+class JSNegativityAFINN extends BackendBase {
+  static sentimentLib = new AFINNSentiment(); 
+  static extraLexicon = {
+    'trump': -2,
+    'covid': -2,
+    'coronavirus': -2,
+    'pandemic': -2,
+  }
 
   static async processElements(elements, chunkCallback) {
     const texts = this.collectTexts_(elements);
     const values = texts.map(
-      (text) => countMatches(text, this.negativesPattern) / countMatches(text, wordPattern)
+      (text) => {
+        const result = this.sentimentLib.analyze(text, this.extraLexicon);
+        // return -1 * result.comparative; 
+        return -1 * result.score / result.calculation.length; 
+      }
+    );
+    chunkCallback(elements, values);
+  }
+}
+
+/**
+ * Updates negativity values using https://github.com/vaderSentiment/vaderSentiment-js
+ * which is a JS port of python https://github.com/cjhutto/vaderSentiment
+ */
+class JSNegativityVader extends BackendBase {
+  static extraLexicon = {
+    'trump': -2,
+    'covid': -2,
+    'coronavirus': -2,
+    'pandemic': -2,
+  }
+  static lexiconUpdated = false;
+
+  static lazyLexiconUpdate() {
+    if (!this.lexiconUpdated) {
+      Object.assign(vaderLexicon, this.extraLexicon);
+      this.lexiconUpdated = true;
+    }
+  }
+  
+  static async processElements(elements, chunkCallback) {
+    this.lazyLexiconUpdate();
+    const texts = this.collectTexts_(elements);
+    const values = texts.map(
+      (text) => {
+        const result = VaderAnalyser.polarity_scores(text);
+        return (0.5 - 0.5 * result.compound); // compound score is in [-1, 1] range
+        // consider using neg / neu / pos raw fields that are
+        // ratios of parts of text that fall in each category
+      }
     );
     chunkCallback(elements, values);
   }
@@ -82,7 +126,7 @@ class PythonBackendNegativity extends BackendBase {
 /**
  * Processes and updates negativity data for elements
  */
-export default class NegativityCalculator {
+export class NegativityCalculator {
   // constants
   static textNodesSelector =
     'div,h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td';
@@ -91,8 +135,9 @@ export default class NegativityCalculator {
   static stats;
 
   static backends = {
-    simple: NaiveNegativity,
-    python: PythonBackendNegativity,
+    'python': PythonBackendNegativity,
+    'jsvader': JSNegativityVader, 
+    'jsafinn': JSNegativityAFINN,
   };
 
   static updateAll(restyleCallback) {

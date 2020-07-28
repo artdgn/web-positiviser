@@ -2,7 +2,7 @@ import $ from 'jquery';
 
 import { scoredTextsClassName, scoredTextsValueAtt, scoredTextsRankAtt } from './common';
 
-export default class Restyler {
+export class Restyler {
   // constants
   static containerSelector = 'div,tr,nav';
   static origOpacityAttr = 'data-original-opacity';

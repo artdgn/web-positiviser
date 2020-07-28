@@ -1,5 +1,5 @@
-import NegativityCalculator from './backends';
-import Restyler from './restyling';
+import {NegativityCalculator} from './backends';
+import {Restyler} from './restyling';
 
 function calulationsCallback() {
   Restyler.updateAll();
