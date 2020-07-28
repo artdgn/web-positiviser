@@ -1,9 +1,18 @@
-/**
- * sadly, imports cannot be used, so these "scripts" share a common context.
- * This script assumes that common.js ran before it.
- */
+import $ from 'jquery';
+import Sentiment from 'sentiment';
 
-const wordPattern = /[a-z]{3,}/ig
+import {
+  scoredTextsClassName,
+  scoredTextsValueAtt,
+  scoredTextsRankAtt,
+  countMatches,
+  extractElementText,
+} from './common';
+
+// uncomment to use sentiment library
+// const sentiment = new Sentiment();
+
+const wordPattern = /[a-z]{3,}/gi;
 
 class BackendBase {
   static async processElements(elements, valuesCallback) {}
@@ -17,12 +26,13 @@ class BackendBase {
  * Updates negativity values using a very simple regex heuristic
  */
 class NaiveNegativity extends BackendBase {
-  static negativesPattern = /trump|covid|coronavirus|pandemic/ig;
+  static negativesPattern = /trump|covid|coronavirus|pandemic/gi;
 
   static async processElements(elements, chunkCallback) {
     const texts = this.collectTexts_(elements);
-    const values = texts.map((text) => 
-      countMatches(text, this.negativesPattern) / countMatches(text, wordPattern));
+    const values = texts.map(
+      (text) => countMatches(text, this.negativesPattern) / countMatches(text, wordPattern)
+    );
     chunkCallback(elements, values);
   }
 }
@@ -47,12 +57,12 @@ class PythonBackendNegativity extends BackendBase {
       start += this.chunkSize;
     }
   }
-  
+
   static async singleCallPromise_(elements) {
     try {
       const response = await fetch(this.address, {
         method: 'post',
-        body: JSON.stringify({'texts': this.collectTexts_(elements)}),
+        body: JSON.stringify({ texts: this.collectTexts_(elements) }),
       });
 
       if (response.status === 200) {
@@ -62,8 +72,7 @@ class PythonBackendNegativity extends BackendBase {
         console.log(response);
         throw new Error(`Backend returned error: ${response.status}`);
       }
-    }
-    catch (error) {
+    } catch (error) {
       alert(`PythonBackendNegativity call failed: ${error}`);
       console.log(error);
     }
@@ -73,41 +82,44 @@ class PythonBackendNegativity extends BackendBase {
 /**
  * Processes and updates negativity data for elements
  */
-class NegativityCalculator { 
-  static textNodesSelector = 
-    'div,h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td'; 
+export default class NegativityCalculator {
+  static textNodesSelector = 'div,h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td';
   static minNumWords = 5;
 
   static backends = {
-    'simple': NaiveNegativity,
-    'python': PythonBackendNegativity,
-  }
+    simple: NaiveNegativity,
+    python: PythonBackendNegativity,
+  };
 
   static updateAll(restyleCallback) {
-    chrome.storage.sync.get({
-      backend: 'python',
-    }, (settings) => {
-      const allElements = this.findTextElements_();
-      this.removeAllValues_(allElements);
-      if (settings.backend === 'off') {
-        restyleCallback();
-      } else {
-        this.backends[settings.backend].processElements(
-            allElements, 
+    chrome.storage.sync.get(
+      {
+        backend: 'python',
+      },
+      (settings) => {
+        const allElements = this.findTextElements_();
+        this.removeAllValues_(allElements);
+        if (settings.backend === 'off') {
+          restyleCallback();
+        } else {
+          this.backends[settings.backend].processElements(
+            allElements,
             (chunkElements, chunkValues) => {
               this.setNegativityValues_(chunkElements, chunkValues);
               // update all ranks for all elements
               this.updateNegativityRanks_(allElements);
               restyleCallback();
-            });
+            }
+          );
+        }
       }
-    });
+    );
   }
 
   static findTextElements_() {
     return $(this.textNodesSelector).filter((i, element) => {
       const text = extractElementText(element);
-      return (countMatches(text, wordPattern) >= this.minNumWords);
+      return countMatches(text, wordPattern) >= this.minNumWords;
     });
   }
 
@@ -123,7 +135,7 @@ class NegativityCalculator {
     const ranks = this.arrayDenseRanks_(values);
     const maxRank = Math.max.apply(null, ranks);
     elements.each((i, el) => {
-      $(el).attr(scoredTextsRankAtt, ranks[i] / maxRank); 
+      $(el).attr(scoredTextsRankAtt, ranks[i] / maxRank);
     });
   }
 
@@ -136,9 +148,8 @@ class NegativityCalculator {
   }
 
   static arrayDenseRanks_(arr) {
-    const sorted = Array.from(new Set(arr)).sort((a, b) => (a - b));
-    const ranks = arr.map((v) => (sorted.indexOf(v) + 1));
+    const sorted = Array.from(new Set(arr)).sort((a, b) => a - b);
+    const ranks = arr.map((v) => sorted.indexOf(v) + 1);
     return ranks;
   }
 }
-  

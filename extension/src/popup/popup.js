@@ -10,19 +10,22 @@ function saveOptions() {
 }
 
 function updateFromStored() {
-  chrome.storage.sync.get({
-    styling: 'opacity',
-    backend: 'python',
-    threshold: 0.5,
-    ranking: false,
-    onlyTexts: false,
-  }, (stored) => {
-    document.getElementById('selected-styling').value = stored.styling;
-    document.getElementById('selected-backend').value = stored.backend;
-    document.getElementById('selected-threshold').value = Math.round(stored.threshold * 100);
-    document.getElementById('selected-ranking-check').checked = stored.ranking;
-    document.getElementById('selected-onlyTexts-check').checked = stored.onlyTexts;
-  });
+  chrome.storage.sync.get(
+    {
+      styling: 'opacity',
+      backend: 'python',
+      threshold: 0.5,
+      ranking: false,
+      onlyTexts: false,
+    },
+    (stored) => {
+      document.getElementById('selected-styling').value = stored.styling;
+      document.getElementById('selected-backend').value = stored.backend;
+      document.getElementById('selected-threshold').value = Math.round(stored.threshold * 100);
+      document.getElementById('selected-ranking-check').checked = stored.ranking;
+      document.getElementById('selected-onlyTexts-check').checked = stored.onlyTexts;
+    }
+  );
 }
 
 document.addEventListener('DOMContentLoaded', () => {
