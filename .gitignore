@@ -39,6 +39,7 @@ instance/
 
 # data
 data/*
+out/*
 
 # temp files
 *.*~
