@@ -38,14 +38,16 @@ def sentiment_results_dataframe(texts: Iterable[str]):
     df_out = pd.merge(df_in, no_dups, on='text', how='left')
 
     # log
-    md_table = df_out.sort_values(cols.score).reset_index().to_markdown(floatfmt='.3f')
+    md_table = (df_out[[cols.score, cols.processed_text]]
+                .sort_values(cols.score)
+                .reset_index().to_markdown(floatfmt='.3f'))
     logger.info(f"inference results:\n{md_table}")
     return df_out
 
 
 def tokenizer(text):
     return segtok.tokenizer.symbol_tokenizer(
-        ' '.join(flair.data.word_tokenizer(text)))
+        ' '.join(segtok.tokenizer.word_tokenizer(text)))
 
 
 class RNNModel:

@@ -2,7 +2,7 @@ REPO_NAME=negativity-balancer
 VENV_ACTIVATE=. .venv/bin/activate
 PYTHON=.venv/bin/python
 DOCKER_TAG=artdgn/$(REPO_NAME)
-DOCKER_DATA_ARG=-v $(realpath ./data):/app/data
+DOCKER_DATA_ARG=-v $(realpath ./data):/app/data -v $(HOME)/.cache/torch:/root/.cache/torch
 PORT=8000
 
 .venv:

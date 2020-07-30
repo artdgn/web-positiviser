@@ -5,4 +5,4 @@ numpy
 pandas
 tabulate
 flair
-transformers==2.11.0  # temporary until flair catches up
+transformers
