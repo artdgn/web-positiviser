@@ -21,7 +21,7 @@ export class NegativityScorer {
   static stats;
 
   static backends = {
-    'python': PythonBackendNegativity,
+    'pyflair': PythonBackendNegativity,
     'jsvader': JSNegativityVader,
     'jsafinn': JSNegativityAFINN,
   };
@@ -29,7 +29,7 @@ export class NegativityScorer {
   static updateAll(restyleCallback) {
     chrome.storage.sync.get(
       {
-        backend: 'python',
+        backend: 'pyflair',
       },
       (settings) => {
         const allElements = this.findTextElements_();

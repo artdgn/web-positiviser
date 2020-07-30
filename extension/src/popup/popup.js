@@ -13,7 +13,7 @@ function updateFromStored() {
   chrome.storage.sync.get(
     {
       styling: 'opacity',
-      backend: 'python',
+      backend: 'pyflair',
       threshold: 0.5,
       ranking: false,
       onlyTexts: false,
