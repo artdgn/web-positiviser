@@ -1,29 +1,27 @@
+import $ from 'jquery';
+import {defaultSettings} from '../settings.js'
+
 function saveOptions() {
-  const options = {
-    styling: document.getElementById('selected-styling').value,
-    backend: document.getElementById('selected-backend').value,
-    threshold: document.getElementById('selected-threshold').value / 100,
-    ranking: document.getElementById('selected-ranking-check').checked,
-    onlyTexts: document.getElementById('selected-onlytexts-check').checked,
+  const settings = {
+    styling: $('#selected-styling')[0].value,
+    backend: $('#selected-backend')[0].value,
+    threshold: $('#selected-threshold')[0].value / 100,
+    ranking: $('#selected-ranking-check')[0].checked,
+    onlyTexts: $('#selected-onlytexts-check')[0].checked,
   };
-  chrome.storage.sync.set(options);
+  chrome.storage.sync.set({ storedSettings: settings });
 }
 
 function loadOptions() {
   chrome.storage.sync.get(
-    {
-      styling: 'opacity',
-      backend: 'pyflair',
-      threshold: 0.5,
-      ranking: false,
-      onlyTexts: false,
-    },
+    { storedSettings: defaultSettings },
     (stored) => {
-      document.getElementById('selected-styling').value = stored.styling;
-      document.getElementById('selected-backend').value = stored.backend;
-      document.getElementById('selected-threshold').value = Math.round(stored.threshold * 100);
-      document.getElementById('selected-ranking-check').checked = stored.ranking;
-      document.getElementById('selected-onlytexts-check').checked = stored.onlyTexts;
+      const settings = stored.storedSettings;
+      $('#selected-styling')[0].value = settings.styling;
+      $('#selected-backend')[0].value = settings.backend;
+      $('#selected-threshold')[0].value = Math.round(settings.threshold * 100);
+      $('#selected-ranking-check')[0].checked = settings.ranking;
+      $('#selected-onlytexts-check')[0].checked = settings.onlyTexts;
     }
   );
 }
@@ -40,23 +38,23 @@ function updateStatsText() {
         const positives = tabStats.total - tabStats.negatives;
         const percentageText = `${(100 * positives / tabStats.total).toFixed(1)}%`;
         const text = `${percentageText} (${positives} / ${tabStats.total})`
-        document.getElementById('positivity-score').textContent = text;
+        $('#positivity-score')[0].textContent = text;
       });
     });  
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function onReady() {
   // options
   loadOptions();
   // add options listeners
-  for (element of document.getElementsByClassName('stored-options')) {
-    element.addEventListener('change', saveOptions);
-  }
+  $('.stored-options').on('change', saveOptions);
 
   // stats
   updateStatsText();
   // watch for stats changes
   chrome.storage.local.onChanged.addListener(
     (changes) => { if (changes.stats != null) updateStatsText() });
-});
+}
+
+$(onReady);
 

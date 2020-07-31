@@ -1,1 +1,1 @@
-import './content/main';
+import './content/main.js';

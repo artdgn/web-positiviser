@@ -1,6 +1,12 @@
 import $ from 'jquery';
 
-import { scoredTextsClassName, scoredTextsValueAtt, scoredTextsRankAtt } from './common';
+import { 
+  scoredTextsClassName, 
+  scoredTextsValueAtt, 
+  scoredTextsRankAtt,
+ } from './common.js';
+
+import {defaultSettings} from '../settings.js'
 
 export class Restyler {
   // constants
@@ -18,14 +24,9 @@ export class Restyler {
 
   static updateAll() {
     chrome.storage.sync.get(
-      {
-        styling: 'opacity',
-        threshold: 0.5,
-        ranking: false,
-        onlyTexts: false,
-      },
-      (settings) => {
-        this.settings_ = settings;
+      { storedSettings: defaultSettings },
+      (stored) => {
+        this.settings_ = stored.storedSettings;
         this.findAndRestyleAll_();
       }
     );

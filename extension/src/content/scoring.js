@@ -4,10 +4,12 @@ import {
   scoredTextsValueAtt,
   scoredTextsRankAtt,
   countMatches,
-  extractElementText
-} from './common';
+  extractElementText,
+} from './common.js';
 
-import { PythonBackendNegativity, JSNegativityVader, JSNegativityAFINN } from './backends';
+import {defaultSettings} from '../settings.js'
+
+import { PythonBackendNegativity, JSNegativityVader, JSNegativityAFINN } from './backends.js';
 
 /**
  * Processes and updates negativity data for elements
@@ -29,9 +31,10 @@ export class NegativityScorer {
   static updateAll(restyleCallback) {
     chrome.storage.sync.get(
       {
-        backend: 'pyflair',
+        storedSettings: defaultSettings,
       },
-      (settings) => {
+      (stored) => {
+        const settings = stored.storedSettings;
         const allElements = this.findTextElements_();
         this.removeAllValues_(allElements);
         if (settings.backend !== 'off') {

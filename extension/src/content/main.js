@@ -1,5 +1,5 @@
-import {NegativityScorer} from './scoring';
-import {Restyler} from './restyling';
+import {NegativityScorer} from './scoring.js';
+import {Restyler} from './restyling.js';
 
 function calulationsCallback() {
   Restyler.updateAll();
@@ -12,7 +12,9 @@ NegativityScorer.updateAll(calulationsCallback);
 
 // watch for option changes
 chrome.storage.onChanged.addListener((changes) => {
-  if (changes.backend != null) {
+  const settingsChange = changes.storedSettings;
+  if ((settingsChange != null) &&
+      (settingsChange.newValue.backend != null)) {
     NegativityScorer.updateAll(calulationsCallback);
   } else {
     Restyler.updateAll();
