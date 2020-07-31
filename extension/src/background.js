@@ -5,7 +5,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
         {stats: {}}, 
         (stored) => {
           stored.stats[tabId] = message.stats;
-          chrome.storage.local.set(stored, () => void console.log(stored));
+          chrome.storage.local.set(stored);
       });
     }
 })

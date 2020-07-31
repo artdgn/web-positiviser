@@ -1,22 +1,23 @@
-## Negativity Balancer:
+# Negativity Balancer:
 Using sentiment analysis to reduce bad news visibility.
 
 ![negativity-balancer.gif](https://artdgn.github.io/images/negativity-balancer.gif)
 
-## What is this?
-- A browser extension that uses a DL sentiment analysis models
-running in the background or JS rule based libraries to score elements based on negativity 
-of the text in them and adjust the style to reduce their visibility.
-- This is very much a work in progress and not a ready to be used extension yet.
+## What does this do?
+- A browser extension that finds negative elements on the page and makes them less visible:
+    - Negativity is calculated using either a DL model running in the background or JS rule based logic.
+- The user controls various options (negativity threshold, restying options) via the options menu:
+    - Visibility is reduced by increasing transparency, or by hiding the element completely. 
+    - Colors can be added for inspection / debugging, or for examining the positivity.
 - The negativity classification is by no means perfect (so it's no a "Negativity Blocker" yet :), 
 but it does work pretty well to re-balance the amount of negative and positive items on different pages.
   
 
-### Running locally 
+## Running locally 
 
-#### Browser extension (Chrome / Firefox):
+### Browser extension (Chrome / Firefox):
 - Go to `extension/` folder:
-- Install: `npm install`
+- To install in local environment: `npm install`
 - Build: `npm build`
 - Add to browser:
     - [Chrome instructions docs](https://developer.chrome.com/extensions/getstarted#manifest):
@@ -29,18 +30,20 @@ but it does work pretty well to re-balance the amount of negative and positive i
 - To update (on code changes): go to extension details and press update / reload.
    
 
-#### Inference server (first run will take time to download the model):
-##### Option #1: Docker:
-- Create a directory to hold the model between runs: `mkdir ~/model_data`
-- `docker run -it --rm -p 8000:8000 -v ~/model_data:/app/data artdgn/negativity-balancer`
+### Calculation backends:
 
-##### Option #2: Local python:
-- Install in local virtual environment (after cloning repo): `make install`
-- Run server: `make server`
+#### Option #0: Browser side analysis (rule based):
+Choose one of the `(JS)` marked options in the "Calculation" drop-down in the extension options 
+(on icon press). This will use browser side analysis (using packages listed below in credits).
 
-##### Option #3: No backend - browser side analysis:
-- Choose one of the `JS-**` options in the "Calculation" drop-down in the extension options 
-(on icon press). This will use  browser side analysis (using packages listed below in credits).
+#### Option #1: Python inference server (first run will take time to download the model)
+1. Running in docker without local python:
+    - Create a directory to hold the model between runs: `mkdir ~/model_data`
+    - `docker run -it --rm -p 8000:8000 -v ~/model_data:/app/data artdgn/negativity-balancer`
+
+2. Local python:
+    - To create local virtual environment and install (after cloning repo): `make install`
+    - Run server: `make server`
 
 ### Credits:
 - Python (DL based) sentiment analysis model and package: [flair NLP](https://github.com/flairNLP/flair)

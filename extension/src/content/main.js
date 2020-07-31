@@ -12,7 +12,6 @@ NegativityScorer.updateAll(calulationsCallback);
 
 // watch for option changes
 chrome.storage.onChanged.addListener((changes) => {
-  console.log(changes);
   if (changes.backend != null) {
     NegativityScorer.updateAll(calulationsCallback);
   } else {

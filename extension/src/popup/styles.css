@@ -24,6 +24,16 @@ body {
   flex-direction: row;
   margin-top: 0.5rem;
 }
+#stats {
+  margin-top: 0.5rem;
+}
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+}
 input[type='range'] {
   width: 100%;
 }
