@@ -3,11 +3,11 @@ import {defaultSettings} from '../settings.js'
 
 function saveOptions() {
   const settings = {
-    styling: $('#selected-styling')[0].value,
-    backend: $('#selected-backend')[0].value,
-    threshold: $('#selected-threshold')[0].value / 100,
-    ranking: $('#selected-ranking-check')[0].checked,
-    onlyTexts: $('#selected-onlytexts-check')[0].checked,
+    styling: $('#selected-styling').val(),
+    backend: $('#selected-backend').val(),
+    threshold: $('#selected-threshold').val() / 100,
+    ranking: $('#selected-ranking-check').prop('checked'),
+    onlyTexts: $('#selected-onlytexts-check').prop('checked'),
   };
   chrome.storage.sync.set({ storedSettings: settings });
 }
@@ -17,11 +17,11 @@ function loadOptions() {
     { storedSettings: defaultSettings },
     (stored) => {
       const settings = stored.storedSettings;
-      $('#selected-styling')[0].value = settings.styling;
-      $('#selected-backend')[0].value = settings.backend;
-      $('#selected-threshold')[0].value = Math.round(settings.threshold * 100);
-      $('#selected-ranking-check')[0].checked = settings.ranking;
-      $('#selected-onlytexts-check')[0].checked = settings.onlyTexts;
+      $('#selected-styling').val(settings.styling);
+      $('#selected-backend').val(settings.backend);
+      $('#selected-threshold').val(Math.round(settings.threshold * 100));
+      $('#selected-ranking-check').prop('checked', settings.ranking);
+      $('#selected-onlytexts-check').prop('checked', settings.onlyTexts);
     }
   );
 }
@@ -38,7 +38,7 @@ function updateStatsText() {
         const positives = tabStats.total - tabStats.negatives;
         const percentageText = `${(100 * positives / tabStats.total).toFixed(1)}%`;
         const text = `${percentageText} (${positives} / ${tabStats.total})`
-        $('#positivity-score')[0].textContent = text;
+        $('#positivity-score').text(text);
       });
     });  
 }
