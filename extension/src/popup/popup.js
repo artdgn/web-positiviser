@@ -8,6 +8,8 @@ function saveOptions() {
     threshold: $('#selected-threshold').val() / 100,
     ranking: $('#selected-ranking-check').prop('checked'),
     onlyTexts: $('#selected-onlytexts-check').prop('checked'),
+    onOff: $('#selected-onoff-check').prop('checked'),
+    globalSettings: $('#selected-globalsettings-check').prop('checked'),
   };
   chrome.storage.sync.set({ storedSettings: settings });
 }
@@ -22,6 +24,8 @@ function loadOptions() {
       $('#selected-threshold').val(Math.round(settings.threshold * 100));
       $('#selected-ranking-check').prop('checked', settings.ranking);
       $('#selected-onlytexts-check').prop('checked', settings.onlyTexts);
+      $('#selected-onoff-check').prop('checked', settings.onOff);
+      $('#selected-globalsettings-check').prop('checked', settings.globalSettings);
     }
   );
 }
@@ -36,8 +40,11 @@ function updateStatsText() {
       }, (tabs) => {
         const tabStats = stored.stats[tabs[0].id];
         const positives = tabStats.total - tabStats.negatives;
-        const percentageText = `${(100 * positives / tabStats.total).toFixed(1)}%`;
-        const text = `${percentageText} (${positives} / ${tabStats.total})`
+        let text = '';
+        if (!isNaN(positives)) {
+          const percentageText = `${(100 * positives / tabStats.total).toFixed(1)}%`;
+          text = `${percentageText} (${positives} / ${tabStats.total})`
+        }
         $('#positivity-score').text(text);
       });
     });  

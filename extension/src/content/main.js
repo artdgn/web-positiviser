@@ -11,13 +11,15 @@ function calulationsCallback() {
 NegativityScorer.updateAll(calulationsCallback);
 
 // watch for option changes
-chrome.storage.onChanged.addListener((changes) => {
-  const settingsChange = changes.storedSettings;
-  if ((settingsChange != null) &&
-      (settingsChange.newValue.backend != null)) {
-    NegativityScorer.updateAll(calulationsCallback);
-  } else {
-    Restyler.updateAll();
+chrome.storage.onChanged.addListener((changes) => {  
+  if ('storedSettings' in changes) {
+    const settingsChange = changes.storedSettings;
+    if ((settingsChange.newValue.backend != settingsChange.oldValue.backend) ||
+        (settingsChange.newValue.onOff != settingsChange.oldValue.onOff) ) {
+      NegativityScorer.updateAll(calulationsCallback);
+    } else {
+      Restyler.updateAll();
+    }
   }
 });
 

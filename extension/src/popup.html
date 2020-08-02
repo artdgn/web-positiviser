@@ -14,27 +14,24 @@ Allows user to adjust filtration settings.
           <span>Negativity Balancer</span>
         </div>
         <div class="option-row">
-          <label for="selected-onoff-check">On&nbsp
+          <label for="selected-onoff-check" title="Toggle extension on / off">On&nbsp
             <input 
+              class="stored-options"
               title="Toggle extension off" 
               type="checkbox" 
               id="selected-onoff-check" />
           </label>
-          <label for="selected-globalsettings-check">Global settings&nbsp
+          <label 
+            for="selected-globalsettings-check" 
+            title="Change settings globally or for this tab only."
+          >Global settings&nbsp
             <input 
+              class="stored-options"
               type="checkbox" 
               id="selected-globalsettings-check" />
           </label>
         </div>
         <hr class="dotted">
-        <div class="option-row" title="Choose how to alter negative&#013;items' visibility">
-          <label for="selected-styling">Styling</label>
-          <select id="selected-styling" class="stored-options">
-            <option value="opacity">&nbspTransparency&nbsp</option>
-            <option value="remove">&nbspRemove&nbsp</option>
-            <option value="color">&nbspColors&nbsp</option>
-          </select>
-        </div>
 
         <div class="option-row" title="Increase to show more / Decrease for less">
           <label for="selected-threshold">Negativity tolerance</label>
@@ -48,6 +45,15 @@ Allows user to adjust filtration settings.
           />
         </div>
 
+        <div class="option-row" title="Choose how to alter negative&#013;items' visibility">
+          <label for="selected-styling">Styling</label>
+          <select id="selected-styling" class="stored-options">
+            <option value="opacity">&nbspTransparency&nbsp</option>
+            <option value="remove">&nbspRemove&nbsp</option>
+            <option value="color">&nbspColors&nbsp</option>
+          </select>
+        </div>
+        
         <div
           class="option-row"
           title="Toggle to use relative sensitivity&#013;(e.g. set threshold to 20% to show only 20%)"

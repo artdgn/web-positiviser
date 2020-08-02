@@ -37,7 +37,7 @@ export class NegativityScorer {
         const settings = stored.storedSettings;
         const allElements = this.findTextElements_();
         this.removeAllValues_(allElements);
-        if (settings.backend !== 'off') {
+        if ((settings.onOff) && (settings.backend != 'off')) {
           this.backends[settings.backend].processElements(
             allElements,
             (chunkElements, chunkValues) => {
@@ -50,7 +50,7 @@ export class NegativityScorer {
         }
         else {
           this.stats = {};
-          restyleCallback(); // backend == off
+          restyleCallback();
         }
       });
   }
