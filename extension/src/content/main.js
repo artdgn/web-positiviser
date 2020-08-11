@@ -1,21 +1,21 @@
-import {NegativityScorer} from './scoring.js';
-import {Restyler} from './restyling.js';
+import { NegativityScorer } from './scoring.js';
+import { Restyler } from './restyling.js';
 
 function calulationsCallback() {
   Restyler.updateAll();
   chrome.runtime.sendMessage(
-    {type: 'statsUpdate', stats: NegativityScorer.stats});
+    { type: 'statsUpdate', stats: NegativityScorer.stats });
 }
 
 // initial run
 NegativityScorer.updateAll(calulationsCallback);
 
 // watch for option changes
-chrome.storage.onChanged.addListener((changes) => {  
+chrome.storage.onChanged.addListener((changes) => {
   if ('storedSettings' in changes) {
     const settingsChange = changes.storedSettings;
     if ((settingsChange.newValue.backend != settingsChange.oldValue.backend) ||
-        (settingsChange.newValue.onOff != settingsChange.oldValue.onOff) ) {
+      (settingsChange.newValue.onOff != settingsChange.oldValue.onOff)) {
       NegativityScorer.updateAll(calulationsCallback);
     } else {
       Restyler.updateAll();

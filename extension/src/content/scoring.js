@@ -21,6 +21,7 @@ export class NegativityScorer {
   static minNumWords = 5;
   // state
   static stats;
+  static settings_ = {};
 
   static backends = {
     'pyflair': PythonBackendNegativity,
@@ -31,28 +32,34 @@ export class NegativityScorer {
   static updateAll(restyleCallback) {
     chrome.storage.sync.get(
       {
-        storedSettings: defaultSettings,
+        storedSettings: { global: defaultSettings },
       },
       (stored) => {
-        const settings = stored.storedSettings;
-        const allElements = this.findTextElements_();
-        this.removeAllValues_(allElements);
-        if ((settings.onOff) && (settings.backend != 'off')) {
-          this.backends[settings.backend].processElements(
-            allElements,
-            (chunkElements, chunkValues) => {
-              this.setNegativityValues_(chunkElements, chunkValues);
-              // update all ranks for all elements
-              this.updateNegativityRanks_(allElements);
-              this.stats = this.calculateStats_(allElements);
-              restyleCallback();
-            });
-        }
-        else {
-          this.stats = {};
-          restyleCallback();
-        }
+        const domain = window.location.host;
+        this.settings_ = stored.storedSettings[domain] || stored.storedSettings.global;
+        this.updateAll_(restyleCallback);
       });
+  }
+
+  static updateAll_(restyleCallback) {
+    const allElements = this.findTextElements_();
+    this.removeAllValues_(allElements);    
+    if ((this.settings_.onOff) && (this.settings_.backend != 'off')) {
+      // claculations need to be done
+      this.backends[this.settings_.backend].processElements(
+        allElements,
+        (chunkElements, chunkValues) => {
+          this.setNegativityValues_(chunkElements, chunkValues);
+          // update all ranks for all elements
+          this.updateNegativityRanks_(allElements);
+          this.stats = this.calculateStats_(allElements);
+          restyleCallback();
+        });
+    } else {
+      // reset all
+      this.stats = {};
+      restyleCallback();
+    }
   }
 
   static findTextElements_() {

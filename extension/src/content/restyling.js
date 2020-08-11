@@ -1,12 +1,12 @@
 import $ from 'jquery';
 
-import { 
-  scoredTextsClassName, 
-  scoredTextsValueAtt, 
+import {
+  scoredTextsClassName,
+  scoredTextsValueAtt,
   scoredTextsRankAtt,
- } from './common.js';
+} from './common.js';
 
-import {defaultSettings} from '../settings.js'
+import { defaultSettings } from '../settings.js'
 
 export class Restyler {
   // constants
@@ -24,9 +24,10 @@ export class Restyler {
 
   static updateAll() {
     chrome.storage.sync.get(
-      { storedSettings: defaultSettings },
+      { storedSettings: { global: defaultSettings } },
       (stored) => {
-        this.settings_ = stored.storedSettings;
+        const domain = window.location.host;
+        this.settings_ = stored.storedSettings[domain] || stored.storedSettings.global;
         this.findAndRestyleAll_();
       }
     );

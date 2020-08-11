@@ -8,7 +8,7 @@
     "default_title": "Negativity Balancer",
     "default_popup": "popup.html"
   },
-  "permissions": ["storage", "http://localhost/*"],
+  "permissions": ["storage", "tabs", "http://localhost/*"],
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*", "file://*/*"],
