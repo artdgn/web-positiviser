@@ -22,6 +22,8 @@ function saveOptions(event) {
     (stored) => {
       const storedSettings = stored.storedSettings;
       const thisSiteOnly = $(`#${thisSiteCheckId}`).prop('checked');
+      const thisSiteOnlyUpdated = (event.target.id == thisSiteCheckId);
+      const switchedToThisSiteOnly = thisSiteOnlyUpdated && thisSiteOnly;
 
       const newSettings = {
         styling: $('#selected-styling').val(),
@@ -29,20 +31,21 @@ function saveOptions(event) {
         threshold: $('#selected-threshold').val() / 100,
         ranking: $('#selected-ranking-check').prop('checked'),
         onlyTexts: $('#selected-onlytexts-check').prop('checked'),
-        enabled: $('#selected-enabled-check').prop('checked'),
+        enabled: $('#selected-enabled-check').prop('checked') || switchedToThisSiteOnly,
       };
 
-      withTab((tab) => {
-        if ((!thisSiteOnly) && (event.target.id == thisSiteCheckId)) {
-          // just switched back to global - remove domain settings and restore global
+      withTab((tab) => {        
+        const switchedToGlobal = thisSiteOnlyUpdated && !thisSiteOnly;
+        if (switchedToGlobal) {
+          // remove domain settings and restore global
           delete storedSettings[tabDomain(tab)]; // delete tab settings
         } else {
-          // need to update settings
+          // update settings according to thisSiteOnly toggle
           const key = thisSiteOnly ? tabDomain(tab) : 'global';
           storedSettings[key] = newSettings;
         }
         chrome.storage.sync.set({ storedSettings: storedSettings });
-        loadOptions(); // sync view in case global was reset
+        loadOptions(); // sync view in case view needs to change
       });
     });
 }
