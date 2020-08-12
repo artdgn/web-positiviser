@@ -29,7 +29,7 @@ function saveOptions(event) {
         threshold: $('#selected-threshold').val() / 100,
         ranking: $('#selected-ranking-check').prop('checked'),
         onlyTexts: $('#selected-onlytexts-check').prop('checked'),
-        onOff: $('#selected-onoff-check').prop('checked'),
+        enabled: $('#selected-enabled-check').prop('checked'),
       };
 
       withTab((tab) => {
@@ -64,7 +64,7 @@ function loadOptions() {
         $('#selected-threshold').val(Math.round(settings.threshold * 100));
         $('#selected-ranking-check').prop('checked', settings.ranking);
         $('#selected-onlytexts-check').prop('checked', settings.onlyTexts);
-        $('#selected-onoff-check').prop('checked', settings.onOff);
+        $('#selected-enabled-check').prop('checked', settings.enabled);
       });
     }
   );

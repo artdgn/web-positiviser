@@ -5,9 +5,10 @@ import {
   scoredTextsRankAtt,
   countMatches,
   extractElementText,
+  domain,
 } from './common.js';
 
-import {defaultSettings} from '../settings.js'
+import { defaultSettings } from '../settings.js'
 
 import { PythonBackendNegativity, JSNegativityVader, JSNegativityAFINN } from './backends.js';
 
@@ -35,16 +36,15 @@ export class NegativityScorer {
         storedSettings: { global: defaultSettings },
       },
       (stored) => {
-        const domain = window.location.host;
-        this.settings_ = stored.storedSettings[domain] || stored.storedSettings.global;
+        this.settings_ = stored.storedSettings[domain()] || stored.storedSettings.global;
         this.updateAll_(restyleCallback);
       });
   }
 
   static updateAll_(restyleCallback) {
     const allElements = this.findTextElements_();
-    this.removeAllValues_(allElements);    
-    if ((this.settings_.onOff) && (this.settings_.backend != 'off')) {
+    this.removeAllValues_(allElements);
+    if ((this.settings_.enabled) && (this.settings_.backend != 'off')) {
       // claculations need to be done
       this.backends[this.settings_.backend].processElements(
         allElements,

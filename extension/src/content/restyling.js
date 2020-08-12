@@ -4,6 +4,7 @@ import {
   scoredTextsClassName,
   scoredTextsValueAtt,
   scoredTextsRankAtt,
+  domain,
 } from './common.js';
 
 import { defaultSettings } from '../settings.js'
@@ -26,8 +27,7 @@ export class Restyler {
     chrome.storage.sync.get(
       { storedSettings: { global: defaultSettings } },
       (stored) => {
-        const domain = window.location.host;
-        this.settings_ = stored.storedSettings[domain] || stored.storedSettings.global;
+        this.settings_ = stored.storedSettings[domain()] || stored.storedSettings.global;
         this.findAndRestyleAll_();
       }
     );

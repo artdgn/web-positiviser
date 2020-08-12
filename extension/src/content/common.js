@@ -23,3 +23,11 @@ export function extractElementText(element) {
   text = text || `${element.attr('label') || ''} ${element.attr('title') || ''}`;
   return text;
 }
+
+
+/*
+ * settings functions
+ */
+export function domain() {
+  return window.location.host;
+}
