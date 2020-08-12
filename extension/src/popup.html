@@ -17,23 +17,25 @@ Allows user to adjust filtration settings.
       </div>
       <div class="option-row">
         <label for="selected-thissiteonly-check"
-           title="Apply settings for this site only (or globally).">This site only&nbsp
-          <input class="stored-options" type="checkbox" id="selected-thissiteonly-check" />
+          class="with-border" title="Apply settings for this site only (or globally).">
+           <input class="stored-options" type="checkbox" id="selected-thissiteonly-check" />
+           This site only&nbsp          
         </label>
-        <label for="selected-enabled-check" title="Toggle extension on / off">On&nbsp
-          <input class="stored-options" title="Toggle extension off" 
-            type="checkbox" id="selected-enabled-check" />
+        <label for="selected-enabled-check" 
+          class="with-border" title="Toggle extension on / off">
+          <input class="stored-options" title="Toggle extension off" type="checkbox" id="selected-enabled-check" />
+          Enabled&nbsp
         </label>
       </div>
       <hr class="dotted">
 
-      <div class="option-row" title="Increase to show more / Decrease for less">
-        <label for="selected-threshold">Negativity tolerance</label>
-        <input class="slider stored-options" id="selected-threshold" 
+      <div class="option-row with-border" title="Increase to show more / Decrease for less">
+        <label for="selected-threshold">Negativity threshold</label>
+        <input class="slider stored-options with-border" id="selected-threshold" 
           type="range" min="0" max="100" value="50" />
       </div>
 
-      <div class="option-row" title="Choose how to alter negative&#013;items' visibility">
+      <div class="option-row with-border" title="Choose how to alter negative&#013;items' visibility">
         <label for="selected-styling">Styling</label>
         <select id="selected-styling" class="stored-options">
           <option value="opacity">&nbspTransparency&nbsp</option>
@@ -42,27 +44,30 @@ Allows user to adjust filtration settings.
         </select>
       </div>
 
-      <div class="option-row"
-        title="Toggle to use relative sensitivity&#013;(e.g. set threshold to 20% to show only 20%)">
-        <label for="selected-ranking-check">Use percentage values</label>
-        <input class="stored-options" type="checkbox" id="selected-ranking-check" />
-      </div>
-
-      <div class="option-row"
-        title="Toggle to restyle only texts elements&#013; themselves and not their highest container">
-        <label for="selected-onlytexts-check">Only text elements</label>
-        <input class="stored-options" type="checkbox" id="selected-onlytexts-check" />
-      </div>
-
-      <div class="option-row" title="How to calculate negativity values">
-        <label for="selected-backend">Calculation</label>
+      <div class="option-row with-border" title="How to calculate negativity values">
+        <label for="selected-backend">Scoring</label>
         <select id="selected-backend" class="stored-options">
           <option value="pyflair">&nbspFlairNLP (Py)&nbsp</option>
           <option value="jsvader">&nbspVader (JS)&nbsp</option>
           <option value="jsafinn">&nbspAFINN (JS)&nbsp</option>
-          <option value="off">&nbspOff&nbsp</option>
         </select>
       </div>
+
+      <div class="option-row">
+        <label for="selected-ranking-check"
+          class="with-border" title="Toggle to use relative sensitivity&#013;(e.g. set threshold to 20% to show only 20%)">
+          <input class="stored-options" type="checkbox" id="selected-ranking-check" />
+          Use ranks
+        </label>
+        
+        <label for="selected-onlytexts-check" 
+          class="with-border" title="Toggle to restyle only texts elements&#013; themselves and not their highest container">
+          <input class="stored-options" type="checkbox" id="selected-onlytexts-check" />
+          Only texts
+        </label>
+      </div>
+
+      
     </div>
     <hr class="dotted">
     <div id="stats">

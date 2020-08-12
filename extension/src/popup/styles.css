@@ -1,19 +1,19 @@
 body {
-  width: 20rem;
+  width: 19rem;
   margin: 0;
 }
 .container {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
+  padding: 0.5rem;
   font-size: 1.25rem;
   background-color: #f2f2ff;
   color: #382381;
   border: 2px #183578;
 }
 #title {
-  padding-top: 0.3rem;
-  padding-bottom: 0.7rem;
+  padding-top: 0.2rem;
+  padding-bottom: 0.5rem;
   font-size: 1.75rem;
   font-weight: bold;
   text-align: center;
@@ -24,6 +24,14 @@ body {
   flex-direction: row;
   margin-top: 0.5rem;
 }
+.with-border{
+  border: 0.1rem solid #c3c4c2;
+  padding: 0.5rem;
+  border-radius: 0.5rem; 
+}
+.with-border:hover {
+  background-color: white;
+}
 #stats {
   margin-top: 0.5rem;
 }
@@ -31,21 +39,22 @@ body {
   display: flex;
   justify-content: space-between;
   flex-direction: row;
-  margin-top: 0.5rem;
   font-size: 1rem;
 }
 hr {
-  margin: 1rem;
+  margin: 0.7rem;
 }
 input[type='range'] {
   width: 100%;
+  padding: 0;
 }
 input[type='checkbox'] {
   transform: scale(1.5);
 }
 select {
-  width: 55%;
+  width: 70%;
   font-size: 1.25rem;
   text-align: center;
   background-color: #f2f2ff;
+  border-radius: 0.4rem;
 }
