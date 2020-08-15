@@ -99,7 +99,7 @@ function onReady() {
   // stats
   updateStatsText();
   // watch for stats changes
-  chrome.storage.local.onChanged.addListener(
+  chrome.storage.onChanged.addListener(
     (changes) => { if (changes.stats != null) updateStatsText() });
 }
 

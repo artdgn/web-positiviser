@@ -17,7 +17,9 @@ import { PythonBackendNegativity, JSNegativityVader, JSNegativityAFINN } from '.
  */
 export class NegativityScorer {
   // constants
-  static textNodesSelector = 'div,h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,font,big,small,b,i,u,td';
+  static textNodesSelector = 
+    'div,h1,h2,h3,h4,h5,p,span,li,a,img,strong,em,\
+    font,big,small,b,i,u,td,yt-formatted-string';
   static wordPattern = /[a-z]{3,}/gi;
   static minNumWords = 5;
   // state
@@ -36,7 +38,7 @@ export class NegativityScorer {
         storedSettings: { global: defaultSettings },
       },
       (stored) => {
-        this.settings_ = stored.storedSettings[domain()] || stored.storedSettings.global;
+        this.settings_ = stored.storedSettings[domain()] || stored.storedSettings.global;        
         this.updateAll_(restyleCallback);
       });
   }
