@@ -43,6 +43,7 @@ body {
 }
 hr {
   margin: 0.7rem;
+  color: #c3c4c2;
 }
 input[type='range'] {
   width: 100%;
@@ -52,7 +53,7 @@ input[type='checkbox'] {
   transform: scale(1.5);
 }
 select {
-  width: 70%;
+  width: 65%;
   font-size: 1.25rem;
   text-align: center;
   background-color: #f2f2ff;

@@ -5,7 +5,7 @@
   "scripts": {
     "prebuild": "rm -rf dist .cache",
     "start": "NODE_ENV=development parcel watch src/background.js src/popup.html src/content-script.js --no-hmr",
-    "build": "NODE_ENV=production parcel build src/background.js src/popup.html src/content-script.js && zip -9 -r negativity-balancer.zip dist"
+    "build": "NODE_ENV=production parcel build src/background.js src/popup.html src/content-script.js && cd dist && zip -9 -rFS ../negativity-balancer.zip * && cd -"
   },
   "keywords": [],
   "author": "",
