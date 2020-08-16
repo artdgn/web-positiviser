@@ -57,6 +57,7 @@ class RNNModel:
     _vocab = set()
     _max_pred_tokens = 20
     _cache = {}
+    _max_cache_size = 1000000
 
     @property
     def _model_path(self):
@@ -102,7 +103,14 @@ class RNNModel:
 
         # update cache
         new_texts = [s.to_plain_string() for s in new_sentences]
+        self._check_cache_size()
         self._cache.update({k: v for k, v in zip(new_texts, new_scores)})
+
+    def _check_cache_size(self):
+        if len(self._cache) > self._max_cache_size:
+            # decimate oldest keys
+            for key in list(self._cache.keys())[:(self._max_cache_size // 10)]:
+                del self._cache[key]
 
     def negativity_scores(self, str_list: Iterable[str]):
         sents = self._texts_prep(str_list)
