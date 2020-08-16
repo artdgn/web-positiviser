@@ -64,8 +64,9 @@ export class JSNegativityVader extends BackendBase {
     const values = texts.map(
       (text) => {
         const result = VaderAnalyser.polarity_scores(text);
-        return (0.5 - 0.5 * result.compound); // compound score is in [-1, 1] range
-        // consider using neg / neu / pos raw fields that are
+        // return (0.5 - 0.5 * result.compound); // compound score is in [-1, 1] range
+        return Math.min(1, Math.max(0, (0.5 + result.neg - result.pos))); 
+        // neg / neu / pos raw fields that are
         // ratios of parts of text that fall in each category
       }
     );
