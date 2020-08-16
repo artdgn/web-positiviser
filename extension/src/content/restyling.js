@@ -23,11 +23,6 @@ export class Restyler {
     color: new Map(),
     visibility: new Map(),
   }
-  static alteredValues_ = {
-    opacity: new Map(),
-    color: new Map(),
-    visibility: new Map(),
-  }
   static settings_ = {};
 
   static updateAll() {
@@ -97,10 +92,8 @@ export class Restyler {
   }
 
   static storeRestoreValue(element, attType, curValue) {
-    if ((this.alteredValues_[attType].get(element[0]) != curValue)) {      
-      // if this is a newly encountered element or
-      // if value changed since last restyle (someone else changed it)
-      // store that as restore value, 
+    if (!this.restoreValues_[attType].has(element[0])) {      
+      // this is a newly encountered element
       this.restoreValues_[attType].set(element[0], curValue)
     }
   }
@@ -113,7 +106,6 @@ export class Restyler {
       const normScore = (score - threshold) / (1 - threshold + this.eps);
       const opacity = (1 - normScore * (1 - this.minOpacity)).toFixed(2);
       element.css('opacity', opacity);
-      this.alteredValues_.opacity.set(element[0], opacity);
     } else this.resetOriginalOpacity_(element);
   }
 
@@ -142,7 +134,6 @@ export class Restyler {
         colorStr = `rgba(${colorVal}, 255, ${colorVal}, 0.4)`;
       }
       element.css('background-color', colorStr);
-      this.alteredValues_.color.set(element[0], colorStr);
     } else this.resetOriginalColor_(element);
   }
 
@@ -157,7 +148,6 @@ export class Restyler {
 
     if (this.settings_.styling == 'remove' && score >= this.settings_.threshold) {
       element.hide(100);
-      this.alteredValues_.visibility.set(element[0], false);
     } else this.resetOriginalVisility_(element);
   }
 
