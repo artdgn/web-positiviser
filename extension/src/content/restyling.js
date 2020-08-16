@@ -97,8 +97,7 @@ export class Restyler {
   }
 
   static storeRestoreValue(element, attType, curValue) {
-    if (!this.alteredValues_[attType].has(element[0]) || 
-        (this.alteredValues_[attType].get(element[0]) != curValue)) {
+    if ((this.alteredValues_[attType].get(element[0]) != curValue)) {      
       // if this is a newly encountered element or
       // if value changed since last restyle (someone else changed it)
       // store that as restore value, 
