@@ -76,7 +76,9 @@ export class Restyler {
     [...this.restyledPreviously_]
       .filter((element) => !restyled.has(element))
       .forEach((element) => this.resetElementStyle_(element));
+    console.log(`restored ${this.restyledPreviously_.size} elements`);
     this.restyledPreviously_ = restyled;
+    console.log(`altered ${restyled.size} elements`);
   }
 
   static updateElementStyle_(element, score) {
@@ -95,12 +97,12 @@ export class Restyler {
   }
 
   static storeRestoreValue(element, attType, curValue) {
-    if (!(element in this.alteredValues_[attType]) || 
-        (this.alteredValues_[attType](element) != curValue)) {
+    if (!this.alteredValues_[attType].has(element[0]) || 
+        (this.alteredValues_[attType].get(element[0]) != curValue)) {
       // if this is a newly encountered element or
       // if value changed since last restyle (someone else changed it)
       // store that as restore value, 
-      this.restoreValues_[attType].set(element, curValue)
+      this.restoreValues_[attType].set(element[0], curValue)
     }
   }
 
@@ -110,15 +112,15 @@ export class Restyler {
     const threshold = this.settings_.threshold;
     if (this.settings_.styling == 'opacity' && score >= threshold) {
       const normScore = (score - threshold) / (1 - threshold + this.eps);
-      const opacity = 1 - normScore * (1 - this.minOpacity);
+      const opacity = (1 - normScore * (1 - this.minOpacity)).toFixed(2);
       element.css('opacity', opacity);
-      this.alteredValues_.opacity.set(element, opacity);
+      this.alteredValues_.opacity.set(element[0], opacity);
     } else this.resetOriginalOpacity_(element);
   }
 
   static resetOriginalOpacity_(element) {
-    if (element in this.restoreValues_.opacity) {
-      element.css('opacity', this.restoreValues_.opacity.get(element));
+    if (this.restoreValues_.opacity.has(element[0])) {
+      element.css('opacity', this.restoreValues_.opacity.get(element[0]));
     }
   }
 
@@ -141,13 +143,13 @@ export class Restyler {
         colorStr = `rgba(${colorVal}, 255, ${colorVal}, 0.4)`;
       }
       element.css('background-color', colorStr);
-      this.alteredValues_.color.set(element, colorStr);
+      this.alteredValues_.color.set(element[0], colorStr);
     } else this.resetOriginalColor_(element);
   }
 
   static resetOriginalColor_(element) {
-    if (element in this.restoreValues_.color) {
-      element.css('background-color', this.restoreValues_.color.get(element));
+    if (this.restoreValues_.color.has(element[0])) {
+      element.css('background-color', this.restoreValues_.color.get(element[0]));
     }
   }
 
@@ -156,13 +158,13 @@ export class Restyler {
 
     if (this.settings_.styling == 'remove' && score >= this.settings_.threshold) {
       element.hide(100);
-      this.alteredValues_.visibility.set(element, false);
+      this.alteredValues_.visibility.set(element[0], false);
     } else this.resetOriginalVisility_(element);
   }
 
   static resetOriginalVisility_(element) {
-    if (element in this.restoreValues_.visibility) {
-      if (this.restoreValues_.visibility.get(element)) element.show(100);
+    if (this.restoreValues_.visibility.has(element[0])) {
+      if (this.restoreValues_.visibility.get(element[0])) element.show(100);
     }
   }
 }
