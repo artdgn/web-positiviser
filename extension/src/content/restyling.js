@@ -12,21 +12,28 @@ import { defaultSettings } from '../settings.js'
 export class Restyler {
   // constants
   static containerSelector = 'div,tr,nav';
-  static origOpacityAttr = 'data-original-opacity';
-  static origColorAttr = 'data-original-background-color';
-  static origVisibleAttr = 'data-original-visible';
   static eps = 0.001;
   static maxColor = 200;
   static minOpacity = 0.1;
   static scoredTextsSelector = `.${scoredTextsClassName}`;
   // state
   static restyledPreviously_ = new Set();
+  static restoreValues_ = {
+    opacity: new Map(),
+    color: new Map(),
+    visibility: new Map(),
+  }
+  static alteredValues_ = {
+    opacity: new Map(),
+    color: new Map(),
+    visibility: new Map(),
+  }
   static settings_ = {};
 
   static updateAll() {
     chrome.storage.sync.get(
       { storedSettings: { global: defaultSettings } },
-      (stored) => {
+      (stored) => {        
         this.settings_ = stored.storedSettings[domain()] || stored.storedSettings.global;
         this.findAndRestyleAll_();
       }
@@ -87,22 +94,32 @@ export class Restyler {
     this.resetOriginalVisility_(element);
   }
 
-  static updateElementOpacity_(element, score) {
-    if (element.attr(this.origOpacityAttr) === undefined) {
-      element.attr(this.origOpacityAttr, element.css('opacity'));
+  static storeRestoreValue(element, attType, curValue) {
+    if (!(element in this.alteredValues_[attType]) || 
+        (this.alteredValues_[attType](element) != curValue)) {
+      // if this is a newly encountered element or
+      // if value changed since last restyle (someone else changed it)
+      // store that as restore value, 
+      this.restoreValues_[attType].set(element, curValue)
     }
+  }
+
+  static updateElementOpacity_(element, score) {
+    this.storeRestoreValue(element, 'opacity', element.css('opacity'));
 
     const threshold = this.settings_.threshold;
     if (this.settings_.styling == 'opacity' && score >= threshold) {
       const normScore = (score - threshold) / (1 - threshold + this.eps);
       const opacity = 1 - normScore * (1 - this.minOpacity);
       element.css('opacity', opacity);
+      this.alteredValues_.opacity.set(element, opacity);
     } else this.resetOriginalOpacity_(element);
   }
 
   static resetOriginalOpacity_(element) {
-    const origOpacity = element.attr(this.origOpacityAttr);
-    if (origOpacity !== undefined) element.css('opacity', origOpacity);
+    if (element in this.restoreValues_.opacity) {
+      element.css('opacity', this.restoreValues_.opacity.get(element));
+    }
   }
 
   static colorValue_(difference, range) {
@@ -111,41 +128,41 @@ export class Restyler {
   }
 
   static updateElementColor_(element, score) {
-    if (element.attr(this.origColorAttr) === undefined) {
-      element.attr(this.origColorAttr, element.css('background-color'));
-    }
+    this.storeRestoreValue(element, 'color', element.css('background-color'));
 
     const threshold = this.settings_.threshold;
     if (this.settings_.styling == 'color') {
+      let colorStr;
       if (score >= threshold) {
         const colorVal = this.colorValue_(score - threshold, 1 - threshold);
-        element.css('background-color', `rgba(255, ${colorVal}, ${colorVal}, 0.4)`);
+        colorStr = `rgba(255, ${colorVal}, ${colorVal}, 0.4)`;
       } else {
         const colorVal = this.colorValue_(threshold - score, threshold);
-        element.css('background-color', `rgba(${colorVal}, 255, ${colorVal}, 0.4)`);
+        colorStr = `rgba(${colorVal}, 255, ${colorVal}, 0.4)`;
       }
+      element.css('background-color', colorStr);
+      this.alteredValues_.color.set(element, colorStr);
     } else this.resetOriginalColor_(element);
   }
 
   static resetOriginalColor_(element) {
-    const origColor = element.attr(this.origColorAttr);
-    if (origColor !== undefined) element.css('background-color', origColor);
+    if (element in this.restoreValues_.color) {
+      element.css('background-color', this.restoreValues_.color.get(element));
+    }
   }
 
   static updateElementVisibility_(element, score) {
-    if (element.attr(this.origVisibleAttr) === undefined) {
-      element.attr(this.origVisibleAttr, element.is(':visible'));
-    }
+    this.storeRestoreValue(element, 'visibility', element.is(':visible'));
 
     if (this.settings_.styling == 'remove' && score >= this.settings_.threshold) {
       element.hide(100);
+      this.alteredValues_.visibility.set(element, false);
     } else this.resetOriginalVisility_(element);
   }
 
   static resetOriginalVisility_(element) {
-    const origVisibile = element.attr(this.origVisibleAttr);
-    if (origVisibile !== undefined && origVisibile == 'true') {
-      element.show(100);
+    if (element in this.restoreValues_.visibility) {
+      if (this.restoreValues_.visibility.get(element)) element.show(100);
     }
   }
 }
