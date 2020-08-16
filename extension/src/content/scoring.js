@@ -22,6 +22,7 @@ export class NegativityScorer {
     font,big,small,b,i,u,td,yt-formatted-string';
   static wordPattern = /[a-z]{3,}/gi;
   static minNumWords = 5;
+  static minNumElements = 5;
   // state
   static stats;
   static settings_ = {};
@@ -44,9 +45,14 @@ export class NegativityScorer {
   }
 
   static updateAll_(restyleCallback) {
-    const allElements = this.findTextElements_();
+    const allElements = this.qualifiedTextElements($(document));
     this.removeAllValues_(allElements);
-    if ((this.settings_.enabled) && (this.settings_.backend != 'off')) {
+    if (
+        (this.settings_.enabled) && 
+        (this.settings_.backend != 'off') && 
+        (allElements.length >= this.minNumElements)
+        ) {
+      console.log(`scoring ${allElements.length} text elements`);
       // claculations need to be done
       this.backends[this.settings_.backend].processElements(
         allElements,
@@ -64,8 +70,8 @@ export class NegativityScorer {
     }
   }
 
-  static findTextElements_() {
-    return $(this.textNodesSelector).filter((i, element) => {
+  static qualifiedTextElements(elements) {
+    return $(elements).find(this.textNodesSelector).filter((i, element) => {
       const text = extractElementText(element);
       return countMatches(text, this.wordPattern) >= this.minNumWords;
     });

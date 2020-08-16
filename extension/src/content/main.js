@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { domain } from './common.js'
 import { NegativityScorer } from './scoring.js';
 import { Restyler } from './restyling.js';
@@ -17,30 +18,35 @@ function recalculationNeeded(newStoredSettings, oldStoredSettings) {
   );
 }
 
-// initial run
-NegativityScorer.updateAll(calulationsCallback);
+function onReady(){
+  // initial run
+  NegativityScorer.updateAll(calulationsCallback);
 
-// watch for option changes
-chrome.storage.onChanged.addListener((changes) => {
-  if ('storedSettings' in changes) {
-    const settingsChange = changes.storedSettings;
-    if (recalculationNeeded(settingsChange.newValue, settingsChange.oldValue)) {
-      NegativityScorer.updateAll(calulationsCallback);
-    } else {
-      Restyler.updateAll();
+  // watch for option changes
+  chrome.storage.onChanged.addListener((changes) => {
+    if ('storedSettings' in changes) {
+      const settingsChange = changes.storedSettings;
+      if (recalculationNeeded(settingsChange.newValue, settingsChange.oldValue)) {
+        NegativityScorer.updateAll(calulationsCallback);
+      } else {
+        Restyler.updateAll();
+      }
     }
-  }
-});
+  });
 
-// watch for dynamically added elements (infinite scroll / twitter load)
-let added = 0;
-const observer = new MutationObserver((mutationsList) => {
-  for (let mutation of mutationsList) {
-    added += mutation.addedNodes.length;
-  }
-  if (added >= 20) {
-    NegativityScorer.updateAll(calulationsCallback);
-    added = 0;
-  }
-});
-observer.observe(document.body, { attributes: false, childList: true, subtree: true });
+  // watch for dynamically added elements (infinite scroll / twitter load)
+  let changed = new Set();
+  const observer = new MutationObserver((mutationsList) => {   
+    for (let mutation of mutationsList) {
+      mutation.addedNodes.forEach((n) => changed.add(n));
+    }
+    if ((changed.size >= 20) && 
+        (NegativityScorer.qualifiedTextElements([...changed]).length >= 5)) {
+      changed = new Set();
+      NegativityScorer.updateAll(calulationsCallback);
+    }
+  });
+  observer.observe(document.body, { attributes: false, childList: true, subtree: true });
+}
+
+$(onReady)
