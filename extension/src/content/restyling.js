@@ -44,18 +44,26 @@ export class Restyler {
     if (!this.settings_.onlyTexts) {
       const allParents = $(this.containerSelector).has(this.scoredTextsSelector).get();
 
+      // order is assumed to be topological (top to bottom of tree)
+      // so that higher parents have precedence over lower ones
       allParents.forEach((parent) => {
-        const children = $(parent).find(this.scoredTextsSelector);
-      
-        if (children.length > 1) return;
+        const children = $(parent).find(this.scoredTextsSelector).get();
 
-        const onlyChild = children[0];
+        // stop if some are visited
+        if (children.some((el) => visitedChildren.has(el))) return;
 
-        if (visitedChildren.has(onlyChild)) return; // stop if already visited
-        visitedChildren.add(onlyChild);
+        const scores = children.map((el) => parseFloat($(el).attr(scoreAttr)));
+        const numNegs = scores.filter((val) => val >= this.settings_.threshold).length;
 
-        this.updateElementStyle_(parent, $(onlyChild).attr(scoreAttr));
-        restyled.add(parent);
+        // only if all negatives or all positives (or only one child)
+        if ((numNegs == scores.length) || (numNegs == 0)) {         
+          // there is not a mean() or even a sum() function
+          // in all of JS or even its Math(!) module. Mind blown.
+          const meanScore = scores.reduce((a, b) => a + b, 0) / scores.length
+          this.updateElementStyle_(parent, meanScore);
+          children.forEach((el) => visitedChildren.add(el));
+          restyled.add(parent);
+        }
       });
     }
 
