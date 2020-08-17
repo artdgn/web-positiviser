@@ -37,17 +37,18 @@ export class Restyler {
 
   static findAndRestyleAll_() {
     const scoreAttr = this.settings_.ranking ? scoredTextsRankAtt : scoredTextsValueAtt;
-
-    // elements and parents
-    const scoredElements = $(this.scoredTextsSelector);
-    const allParents = $(this.containerSelector).has(this.scoredTextsSelector);
-
-    // try to find highest parents of single neg-elements and update them
-    const visitedChildren = new Set();
     const restyled = new Set();
-    allParents.each((i, parent) => {
-      const children = $(parent).find(this.scoredTextsSelector);
-      if (children.length == 1 && !this.settings_.onlyTexts) {
+    const visitedChildren = new Set();
+    
+    // restyle parents
+    if (!this.settings_.onlyTexts) {
+      const allParents = $(this.containerSelector).has(this.scoredTextsSelector).get();
+
+      allParents.forEach((parent) => {
+        const children = $(parent).find(this.scoredTextsSelector);
+      
+        if (children.length > 1) return;
+
         const onlyChild = children[0];
 
         if (visitedChildren.has(onlyChild)) return; // stop if already visited
@@ -55,11 +56,12 @@ export class Restyler {
 
         this.updateElementStyle_(parent, $(onlyChild).attr(scoreAttr));
         restyled.add(parent);
-      }
-    });
+      });
+    }
 
-    // update all remaining elements that didn't find a single parent
-    scoredElements.each((i, element) => {
+    // restyle unvisited leaves
+    const scoredElements = $(this.scoredTextsSelector).get();
+    scoredElements.forEach((element) => {
       if (!visitedChildren.has(element)) {
         this.updateElementStyle_(element, $(element).attr(scoreAttr));
         restyled.add(element);
@@ -75,7 +77,7 @@ export class Restyler {
     this.restyledPreviously_ = restyled;
     console.log(`altered ${restyled.size} elements`);
   }
-
+ 
   static updateElementStyle_(element, score) {
     element = $(element);
     score = parseFloat(score);
