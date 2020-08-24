@@ -1,15 +1,18 @@
+![CI](https://github.com/artdgn/negativity-balancer/workflows/CI/badge.svg) ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/artdgn/negativity-balancer?label=dockerhub&logo=docker)
+
 # Negativity Balancer:
-Using sentiment analysis to reduce bad news visibility.
+Using sentiment analysis to reduce negative content visibility.
 
 ![negativity-balancer.gif](https://artdgn.github.io/images/negativity-balancer.gif)
 
 ## What does this do?
-- A browser extension that finds negative elements on the page and makes them less visible:
-    - Negativity is calculated using either a DL model running in the background or JS rule based logic.
-- The user controls various options (negativity threshold, restying options) via the options menu:
-    - Visibility is reduced by increasing transparency, or by hiding the element completely. 
-    - Colors can be added for inspection / debugging, or for examining the positivity.
-  
+A browser extension that finds negative elements on the page and makes them less visible:
+- Negativity is calculated using either in browser rule based logic or an optional deep learning model running locally in the background.
+- The user controls various options (negativity threshold, restyling options) via the options menu:
+    - Visibility is reduced by adjusting transparency, or by hiding the element completely.
+    - Colours can be added for inspection, or for examining the positivity.
+    - Settings can be saved per site or globally.
+    - An overall positivity score per page is displayed.
 
 ## Running locally 
 
