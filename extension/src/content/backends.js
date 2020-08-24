@@ -110,7 +110,9 @@ export class PythonBackendNegativity extends BackendBase {
         throw new Error(`Backend returned error: ${response.status}`);
       }
     } catch (error) {
-      alert(`PythonBackendNegativity call failed: ${error}`);
+      alert(
+          'Negativity-Balancer extension: external backend call failed (is it available?).\n\n' + 
+          'Please switch to another scoring option in the menu.');
       console.log(error);
     }
   }

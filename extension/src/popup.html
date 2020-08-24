@@ -13,7 +13,11 @@ Allows user to adjust filtration settings.
   <div class="container">
     <div id="options">
       <div id="title">
-        <span>Negativity Balancer</span>
+        <span>Negativity Balancer&nbsp</span>
+        <a href="https://github.com/artdgn/negativity-balancer/issues" target="_blank" 
+          title="Please open a github issue for any complaints / suggestions.">
+          <img src="../static/images/github.png" id="github">
+        </a>
       </div>
       <div class="option-row">
         <label for="selected-thissiteonly-check"
@@ -27,7 +31,7 @@ Allows user to adjust filtration settings.
           On&nbsp
         </label>
       </div>
-      <hr class="dotted">
+      <hr class="dotted divider">
 
       <div class="option-row with-border" title="Increase to show more / Decrease for less">
         <label for="selected-threshold">Negativity threshold</label>
@@ -69,13 +73,14 @@ Allows user to adjust filtration settings.
 
       
     </div>
-    <hr class="dotted">
+    <hr class="dotted divider">
     <div id="stats">
       <div class="stats-row" title="Percentage of positive elements out of all scored">
         <label for="positivity-score">Page positivity:</label>
         <span id="positivity-score">0%</span>
       </div>
     </div>
+
   </div>
   <script src="./popup/popup.js"></script>
 </body>
