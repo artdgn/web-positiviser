@@ -14,56 +14,59 @@ A browser extension that finds negative elements on the page and makes them less
     - Settings can be saved per site or globally.
     - An overall positivity score per page is displayed.
 
+## Using the extension
+I've started the process to submit it to Chrome and Firefox extension stores. However, it will take a while, as this is my first extension.
+In the meanwhile, it is possible to use it locally by cloning this repo and following the instructions below.
+
 ## Running locally 
 
-### Load browser extension into Chrome or Firefox:
+### Build the extension locally
+<details><summary>Building instructions</summary>
+
 - Clone and go to `extension/` folder:
 - To install in local environment: `npm install`
 - Building: `npm start` for development, `npm run-script build` for packaging into a zip file.
-- Add to browser:
-    <details><summary>Chrome</summary>
+</details>
 
-    - Extensions -> Enable "developer mode" -> 
-    "Load unpacked extensions" -> Navigate to `/extension/dist` folder in this project.
-    - To update (on code changes): and go to extension details and press update / reload.
-    - Docs: [Chrome docs](https://developer.chrome.com/extensions/getstarted#manifest)
+### Load browser extension into Chrome or Firefox:
+<details><summary>Chrome</summary>
 
-    </details>
+- Extensions -> Enable "developer mode" -> 
+"Load unpacked extensions" -> Navigate to `/extension/dist` folder in this project.
+- To update (on code changes): and go to extension details and press update / reload.
+- Docs: [Chrome docs](https://developer.chrome.com/extensions/getstarted#manifest)
+</details>
 
-    <details><summary>Firefox</summary>
+<details><summary>Firefox</summary>
 
-    - To load for development (will be removed after browser close, but easier to reload on code change):
-        - Go to `about:debugging` -> This Firefox -> "Load Temprorary Add-on.." -> 
-        Navigate to `/extension/dist` -> select manifest file.
-        - Press "Reload" to update on code changes.
-    - To load for continuous usage (persistent after closing):
-        - Go to `about:config` and set `xpinstall.signatures.required` to False to be able to load a local extension.
-        - Run `npm run-script build` to package the extensions into a zip file.
-        - Go to `about:addons` -> "gear" icon -> "Install add-on from file.." -> 
-        Navigate to `/extension/` folder in this project -> choose `negativity-balancer.zip`.
-        - To update (on code changes): repeat previous two steps.
-    - Docs: [Firefox docs](https://extensionworkshop.com/documentation/develop/testing-persistent-and-restart-features/)
+- To load for development (will be removed after browser close, but easier to reload on code change):
+    - Go to `about:debugging` -> This Firefox -> "Load Temprorary Add-on.." -> 
+    Navigate to `/extension/dist` -> select manifest file.
+    - Press "Reload" to update on code changes.
+- To load for continuous usage (persistent after closing):
+    - Go to `about:config` and set `xpinstall.signatures.required` to False to be able to load a local extension.
+    - Run `npm run-script build` to package the extensions into a zip file.
+    - Go to `about:addons` -> "gear" icon -> "Install add-on from file.." -> 
+    Navigate to `/extension/` folder in this project -> choose `negativity-balancer.zip`.
+    - To update (on code changes): repeat previous two steps.
+- Docs: [Firefox docs](https://extensionworkshop.com/documentation/develop/testing-persistent-and-restart-features/)
+</details>
 
-    </details>
+### Sentiment scoring options:
 
+1. Browser side, rule based: Any of `(JS)` marked options in the "Scoring" drop-down.
 
-### Calculation backends:
-
-1. ### Browser side, rule based: Any of `(JS)` marked options in the "Calculation" drop-down.
-
-2. ### Python inference server:
+2. Python inference server:
     <details><summary>Running in docker without local python</summary>
 
     - Create a directory to hold the model between runs: `mkdir ~/model_data`
     - `docker run -it --rm -p 8000:8000 -v ~/model_data:/app/data artdgn/negativity-balancer`
-
     </details>
 
     <details><summary>Local python</summary>
 
     - To create local virtual environment and install (after cloning repo): `make install`
     - Run server: `make server`
-
     </details>
 
 ### Credits:
