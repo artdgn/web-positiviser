@@ -1,7 +1,5 @@
 import logging
-import os
 import re
-import shutil
 from typing import List, Iterable
 
 import flair
@@ -10,7 +8,6 @@ import segtok.tokenizer
 
 from backend import data_models
 from backend.sentiment import domain_vocab
-from backend.utils import common
 
 logger = logging.getLogger(__name__)
 
@@ -60,24 +57,13 @@ class RNNModel:
     _max_cache_size = 1000000
 
     @property
-    def _model_path(self):
-        return common.project_path(f'data/{self.flair_model_name}.pt')
-
-    @property
     def model(self):
         if self._model is None:
             self.load()
         return self._model
 
     def load(self):
-        path = self._model_path
-
-        if not os.path.exists(path):
-            _ = flair.models.TextClassifier.load(self.flair_model_name)
-            flair_cache_path = flair.models.TextClassifier._fetch_model(self.flair_model_name)
-            shutil.copy(flair_cache_path, path)
-
-        self._model = flair.models.TextClassifier.load(path)
+        self._model = flair.models.TextClassifier.load(self.flair_model_name)
 
     @staticmethod
     def _negativity_score(sentence: flair.data.Sentence):

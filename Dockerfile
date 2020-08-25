@@ -7,6 +7,9 @@ RUN pip install --upgrade pip \
 
 ENV APP_DIR=/app
 
+# cache model file early
+RUN python -c "import flair; flair.models.TextClassifier.load('sentiment')"
+
 ADD . ${APP_DIR}
 
 WORKDIR ${APP_DIR}

@@ -59,8 +59,7 @@ In the meanwhile, it is possible to use it locally by cloning this repo and foll
 2. Python inference server:
     <details><summary>Running in docker without local python</summary>
 
-    - Create a directory to hold the model between runs: `mkdir ~/model_data`
-    - `docker run -it --rm -p 8000:8000 -v ~/model_data:/app/data artdgn/negativity-balancer`
+    - `docker run -it --rm -p 8000:8000 artdgn/negativity-balancer`
     </details>
 
     <details><summary>Local python</summary>

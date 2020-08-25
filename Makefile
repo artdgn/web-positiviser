@@ -2,7 +2,6 @@ REPO_NAME=negativity-balancer
 VENV_ACTIVATE=. .venv/bin/activate
 PYTHON=.venv/bin/python
 DOCKER_TAG=artdgn/$(REPO_NAME)
-DOCKER_DATA_ARG=-v $(realpath ./data):/app/data -v $(HOME)/.cache/torch:/root/.cache/torch
 PORT=8000
 
 .venv:
@@ -31,14 +30,12 @@ build-docker:
 docker-server: build-docker
 	docker rm -f $(REPO_NAME) || sleep 1
 	docker run -it --rm \
-	$(DOCKER_DATA_ARG) \
 	--name $(REPO_NAME) \
 	-p $(PORT):$(PORT) \
 	$(DOCKER_TAG)
 
 docker-server-persist: build-docker
 	docker run -dit \
-	$(DOCKER_DATA_ARG) \
 	--name $(REPO_NAME) \
 	-p $(PORT):$(PORT) \
 	--restart unless-stopped \

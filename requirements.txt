@@ -64,12 +64,13 @@ tabulate==0.8.7           # via -r requirements.in, flair
 threadpoolctl==2.1.0      # via scikit-learn
 tokenizers==0.8.1.rc1     # via transformers
 toml==0.10.1              # via pytest
-torch==1.6.0              # via flair
+torch==1.6.0+cpu          # via flair
 tqdm==4.48.0              # via bpemb, flair, hyperopt, sacremoses, transformers
-transformers==3.0.2       # via -r requirements.in, flair
+transformers==3.0.2       # via flair
 urllib3==1.25.10          # via botocore, requests
 uvicorn==0.11.7           # via -r requirements.in
 uvloop==0.14.0            # via uvicorn
 websockets==8.1           # via uvicorn
 wrapt==1.12.1             # via deprecated
 zipp==3.1.0               # via importlib-metadata
+-f https://download.pytorch.org/whl/torch_stable.html
