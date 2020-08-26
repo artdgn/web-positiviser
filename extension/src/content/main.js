@@ -1,28 +1,6 @@
-import $ from 'jquery';
 import { domain } from './common.js'
 import { NegativityScorer } from './scoring.js';
 import { Restyler } from './restyling.js';
-
-// on ready
-$(() => {
-  // initial run
-  NegativityScorer.updateAll(calulationsCallback);
-
-  // watch for option changes
-  chrome.storage.onChanged.addListener((changes) => {
-    if ('storedSettings' in changes) {
-      const settingsChange = changes.storedSettings;
-      if (recalculationNeeded(settingsChange.newValue, settingsChange.oldValue)) {
-        NegativityScorer.updateAll(calulationsCallback);
-      } else {
-        Restyler.updateAll();
-      }
-    }
-  });
-
-  // watch for new elements
-  addMutationObserverWithDelay(() => NegativityScorer.updateAll(calulationsCallback));
-})
 
 function calulationsCallback() {
   Restyler.updateAll();
@@ -88,3 +66,25 @@ function addMutationObserverWithDelay(delayedCallback) {
   });
   observer.observe(document.body, { attributes: false, childList: true, subtree: true });
 }
+
+function main() {
+  // initial run
+  NegativityScorer.updateAll(calulationsCallback);
+
+  // watch for option changes
+  chrome.storage.onChanged.addListener((changes) => {
+    if ('storedSettings' in changes) {
+      const settingsChange = changes.storedSettings;
+      if (recalculationNeeded(settingsChange.newValue, settingsChange.oldValue)) {
+        NegativityScorer.updateAll(calulationsCallback);
+      } else {
+        Restyler.updateAll();
+      }
+    }
+  });
+
+  // watch for new elements
+  addMutationObserverWithDelay(() => NegativityScorer.updateAll(calulationsCallback));
+}
+
+main();

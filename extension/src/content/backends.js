@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import AFINNSentiment from 'sentiment';
 import { SentimentIntensityAnalyzer as VaderAnalyser } from 'vader-sentiment/src/vaderSentiment.js';
 import { lexicon as vaderLexicon } from 'vader-sentiment/src/vader_lexicon.js';
@@ -9,7 +8,7 @@ class BackendBase {
   static async processElements(elements, valuesCallback) {}
 
   static collectTexts_(elements) {
-    return $.map(elements, (el) => extractElementText(el));
+    return [...elements].map((el) => extractElementText(el));
   }
 }
 

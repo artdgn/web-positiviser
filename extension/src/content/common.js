@@ -1,5 +1,3 @@
-import $ from 'jquery';
-
 // html persistence constants
 export const scoredTextsClassName = 'negativityText';
 export const scoredTextsValueAtt = 'data-negativity-value';
@@ -14,13 +12,17 @@ export function countMatches(text, pattern) {
   return matches ? matches.length : 0;
 }
 
-export function extractElementText(element) {
-  element = $(element);
-  let text = element.contents().not(element.children()).text();
+export function extractElementText(el) {
+  let text = el.text
+  // text node text
+  text = text ||
+      [...el.childNodes]
+      .filter(el => el.nodeType === Node.TEXT_NODE)
+      .map(el => el.textContent).join("");
   // handle img tags
-  text = text || `${element.attr('alt') || ''}`;
+  text = text || `${el.getAttribute('alt') || ''}`;
   // handle a tags
-  text = text || `${element.attr('label') || ''} ${element.attr('title') || ''}`;
+  text = text || `${el.getAttribute('label') || ''} ${el.getAttribute('title') || ''}`;
   return text;
 }
 
