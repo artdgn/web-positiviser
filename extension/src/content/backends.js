@@ -109,10 +109,17 @@ export class PythonBackendNegativity extends BackendBase {
         throw new Error(`Backend returned error: ${response.status}`);
       }
     } catch (error) {
-      alert(
-          'Negativity-Balancer extension: external backend call failed (is it available?).\n\n' + 
-          'Please switch to another scoring option in the menu.');
       console.log(error);
+      const instructionsLocation = 
+          'https://github.com/artdgn/negativity-balancer#sentiment-scoring-options';
+      const confirmPrompt = (
+          'Negativity-Balancer extension: local backend call failed.\n\n' + 
+          'Please switch to another scoring option, ' + 
+          'or ensure that a local scoring service is running.' + 
+          '\n\nPress "Cancel" to do nothing, or "OK" to open instructions page in a new tab.'
+          );
+      if (window.confirm(confirmPrompt)) window.open(instructionsLocation,'_blank');
+      
     }
   }
 }

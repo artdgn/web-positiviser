@@ -50,3 +50,9 @@ docker-logs:
 
 tests:
 	pytest
+
+zip-source-code:
+	git clone -l . ./temp
+	rm -rf ./temp/.git
+	cd ./temp && zip -9 -rFS ../negativity-balancer-source.zip * && cd -
+	rm -rf ./temp/

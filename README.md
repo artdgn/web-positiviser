@@ -16,11 +16,40 @@ A browser extension that finds negative elements on the page and makes them less
 
 ## Installing the extension
 - [Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/negativity-balancer/)
-- Chrome is still in the process of approval. In the meanwhile, it is possible to use it locally by cloning this repo and following the instructions below.
+- Chrome is still in the process of approval. In the meanwhile, it is possible to use it locally by cloning this repo and following the instructions below for "Using local extension".
 
-## Running locally 
+## Sentiment "Scoring" options:
 
-### Build the extension locally
+1. Use `Vader (JS)` or `AFINN (JS)` in the drop-down for browser side, rule based calculations.
+
+2. For `FlairNLP (Py)` option a local python inference server needs to be running:
+    <details><summary>Running in docker (simplest if you have docker)</summary>
+
+    > Please wait a few seconds after starting to be ready to serve requests.
+
+    Run interactively once (e.g to try it out):
+    - Start: `docker run -p 8000:8000 -it --rm artdgn/negativity-balancer`
+
+    - Stop: just Ctrl+C in the terminal where you're running it.
+
+    Run in detached and persistent mode (e.g. for actual usage):
+    - Start: `docker run -p 8000:8000 -dit --restart unless-stopped --name negativity-balancer artdgn/negativity-balancer`
+
+    - Stop: `docker rm -f negativity-balancer`.
+
+    </details>
+
+    <details><summary>Local python (e.g. for development)</summary>
+
+    1. Clone repo.
+    2. `make install` to create local virtual environment and install dependencies in it. 
+    3. `make server` to run the server. 
+    </details>
+
+
+## Using local extension
+
+### Build
 <details><summary>Building instructions</summary>
 
 - Clone and go to `extension/` folder:
@@ -52,35 +81,13 @@ A browser extension that finds negative elements on the page and makes them less
 - Docs: [Firefox docs](https://extensionworkshop.com/documentation/develop/testing-persistent-and-restart-features/)
 </details>
 
-## Sentiment "Scoring" options:
+## Credits and references:
+<details>
 
-1. Use `Vader (JS)` or `AFINN (JS)` in the drop-down for browser side, rule based calculations.
-
-2. For `FlairNLP (Py)` option a local python inference server needs to be running:
-    <details><summary>Running in docker (simplest if you have docker)</summary>
-
-    Run interactively once (e.g to try it out):
-    > Start: `docker run -p 8000:8000 -it --rm artdgn/negativity-balancer`
-
-    > Stop: just Ctrl+C in the terminal where you're running it.
-
-    Run in detached and persistent mode (e.g. for actual usage):
-    > Start: `docker run -p 8000:8000 -dit --restart unless-stopped artdgn/negativity-balancer`
-
-    > Stop: `docker stop artdgn/negativity-balancer`.
-    </details>
-
-    <details><summary>Local python (e.g. for development)</summary>
-
-    1. Clone repo.
-    2. `make install` to create local virtual environment and install dependencies in it. 
-    3. `make server` to run the server. 
-    </details>
-
-### Credits:
 - Python (DL based) sentiment analysis model and package: [flair NLP](https://github.com/flairNLP/flair)
 - JS sentiment analysis packages:
     - [vaderSentiment](https://github.com/cjhutto/vaderSentiment) (called JS-Vader in options menu)
     - [AFINNSentiment](https://github.com/thisandagain/sentiment ) (called JS-AFINN in options menu)
 - Backend API framework: [fastapi](https://github.com/tiangolo/fastapi)
 - Initial code for browser extension functionality copied from [Trump-Filter](https://github.com/RobSpectre/Trump-Filter)
+</details>
