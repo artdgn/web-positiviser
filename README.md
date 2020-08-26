@@ -25,7 +25,7 @@ In the meanwhile, it is possible to use it locally by cloning this repo and foll
 
 - Clone and go to `extension/` folder:
 - To install in local environment: `npm install`
-- Building: `npm start` for development, `npm run-script build` for packaging into a zip file.
+- Building: `npm start` for development, `npm run build` for packaging into a zip file.
 </details>
 
 ### Load browser extension into Chrome or Firefox:

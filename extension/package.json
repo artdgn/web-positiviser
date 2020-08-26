@@ -16,7 +16,6 @@
     "prettier": "^2.0.5"
   },
   "dependencies": {
-    "jquery": "^3.5.1",
     "sentiment": "^5.0.2",
     "vader-sentiment": "^1.1.3"
   },

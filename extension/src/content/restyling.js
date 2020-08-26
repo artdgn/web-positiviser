@@ -1,5 +1,3 @@
-import $ from 'jquery';
-
 import {
   scoredTextsClassName,
   scoredTextsValueAtt,
@@ -11,7 +9,7 @@ import { defaultSettings } from '../settings.js'
 
 export class Restyler {
   // constants
-  static containerSelector = 'div,tr,nav';
+  static containerSelector = 'div,tr,nav,li';
   static eps = 0.001;
   static maxColor = 200;
   static minOpacity = 0.1;
@@ -30,7 +28,11 @@ export class Restyler {
       { storedSettings: { global: defaultSettings } },
       (stored) => {        
         this.settings_ = stored.storedSettings[domain()] || stored.storedSettings.global;
-        this.findAndRestyleAll_();
+        if (this.settings_.enabled) {
+          this.findAndRestyleAll_();
+        } else {
+          this.restoreRestyledPreviosly();
+        }
       }
     );
   }
@@ -42,17 +44,18 @@ export class Restyler {
     
     // restyle parents
     if (!this.settings_.onlyTexts) {
-      const allParents = $(this.containerSelector).has(this.scoredTextsSelector).get();
+      const allParents = document.querySelectorAll(
+          `${this.containerSelector} > ${this.scoredTextsSelector}`)
 
       // order is assumed to be topological (top to bottom of tree)
       // so that higher parents have precedence over lower ones
       allParents.forEach((parent) => {
-        const children = $(parent).find(this.scoredTextsSelector).get();
+        const children = [...parent.querySelectorAll(this.scoredTextsSelector)];
 
         // stop if some are visited
         if (children.some((el) => visitedChildren.has(el))) return;
 
-        const scores = children.map((el) => parseFloat($(el).attr(scoreAttr)));
+        const scores = children.map((el) => parseFloat(el.getAttribute(scoreAttr)));
         const numNegs = scores.filter((val) => val >= this.settings_.threshold).length;
 
         // only if all negatives or all positives (or only one child)
@@ -68,26 +71,29 @@ export class Restyler {
     }
 
     // restyle unvisited leaves
-    const scoredElements = $(this.scoredTextsSelector).get();
+    const scoredElements = [...document.querySelectorAll(this.scoredTextsSelector)];
     scoredElements.forEach((element) => {
       if (!visitedChildren.has(element)) {
-        this.updateElementStyle_(element, $(element).attr(scoreAttr));
+        this.updateElementStyle_(element, element.getAttribute(scoreAttr));
         restyled.add(element);
       }
-    });
+    });    
+    console.log(`altered ${restyled.size} elements`);    
 
     // reset previously restyled skipped this time
     // (e.g. due to different number of children / backend selection)
-    [...this.restyledPreviously_]
-      .filter((element) => !restyled.has(element))
-      .forEach((element) => this.resetElementStyle_(element));
+    [...restyled].forEach(el => this.restyledPreviously_.delete(el));
+    this.restoreRestyledPreviosly();
+    this.restyledPreviously_ = restyled;   
+  }
+
+  static restoreRestyledPreviosly() {
+    [...this.restyledPreviously_].forEach(el => this.resetElementStyle_(el));
     console.log(`restored ${this.restyledPreviously_.size} elements`);
-    this.restyledPreviously_ = restyled;
-    console.log(`altered ${restyled.size} elements`);
+    this.restyledPreviously_ = new Set();
   }
  
   static updateElementStyle_(element, score) {
-    element = $(element);
     score = parseFloat(score);
     this.updateElementOpacity_(element, score);
     this.updateElementColor_(element, score);
@@ -95,33 +101,42 @@ export class Restyler {
   }
 
   static resetElementStyle_(element) {
-    element = $(element);
     this.resetOriginalOpacity_(element);
     this.resetOriginalColor_(element);
     this.resetOriginalVisility_(element);
   }
 
-  static storeRestoreValue(element, attType, curValue) {
-    if (!this.restoreValues_[attType].has(element[0])) {      
+  static storeRestoreValue_(element, attType, curValue) {
+    if (!this.restoreValues_[attType].has(element)) {      
       // this is a newly encountered element
-      this.restoreValues_[attType].set(element[0], curValue)
+      this.restoreValues_[attType].set(element, curValue)
+    }
+  }
+
+  // opacity
+
+  static resetOriginalOpacity_(element) {
+    if (this.restoreValues_.opacity.has(element)) {
+      element.style.opacity = this.restoreValues_.opacity.get(element);
     }
   }
 
   static updateElementOpacity_(element, score) {
-    this.storeRestoreValue(element, 'opacity', element.css('opacity'));
+    this.storeRestoreValue_(element, 'opacity', element.style.opacity);
 
     const threshold = this.settings_.threshold;
     if (this.settings_.styling == 'opacity' && score >= threshold) {
       const normScore = (score - threshold) / (1 - threshold + this.eps);
       const opacity = (1 - normScore * (1 - this.minOpacity)).toFixed(2);
-      element.css('opacity', opacity);
+      element.style.opacity = opacity;
     } else this.resetOriginalOpacity_(element);
   }
 
-  static resetOriginalOpacity_(element) {
-    if (this.restoreValues_.opacity.has(element[0])) {
-      element.css('opacity', this.restoreValues_.opacity.get(element[0]));
+  // color
+
+  static resetOriginalColor_(element) {
+    if (this.restoreValues_.color.has(element)) {
+      element.style.backgroundColor = this.restoreValues_.color.get(element);
     }
   }
 
@@ -131,7 +146,7 @@ export class Restyler {
   }
 
   static updateElementColor_(element, score) {
-    this.storeRestoreValue(element, 'color', element.css('background-color'));
+    this.storeRestoreValue_(element, 'color', element.style.backgroundColor);
 
     const threshold = this.settings_.threshold;
     if (this.settings_.styling == 'color') {
@@ -143,27 +158,23 @@ export class Restyler {
         const colorVal = this.colorValue_(threshold - score, threshold);
         colorStr = `rgba(${colorVal}, 255, ${colorVal}, 0.4)`;
       }
-      element.css('background-color', colorStr);
+      element.style.backgroundColor = colorStr;
     } else this.resetOriginalColor_(element);
   }
 
-  static resetOriginalColor_(element) {
-    if (this.restoreValues_.color.has(element[0])) {
-      element.css('background-color', this.restoreValues_.color.get(element[0]));
+  // visibility
+
+  static resetOriginalVisility_(element) {
+    if (this.restoreValues_.visibility.has(element)) {
+      element.style.display = this.restoreValues_.visibility.get(element);
     }
   }
 
   static updateElementVisibility_(element, score) {
-    this.storeRestoreValue(element, 'visibility', element.is(':visible'));
+    this.storeRestoreValue_(element, 'visibility', element.style.display);
 
     if (this.settings_.styling == 'remove' && score >= this.settings_.threshold) {
-      element.hide(100);
+      element.style.display = 'none';
     } else this.resetOriginalVisility_(element);
-  }
-
-  static resetOriginalVisility_(element) {
-    if (this.restoreValues_.visibility.has(element[0])) {
-      if (this.restoreValues_.visibility.get(element[0])) element.show(100);
-    }
   }
 }

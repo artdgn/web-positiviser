@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { defaultSettings } from '../settings.js'
 
 const thisSiteCheckId = 'selected-thissiteonly-check';
@@ -16,22 +15,26 @@ function tabDomain(tab) {
   return tab.url.match(/:\/\/[a-z0-9\-._~%]+/gi)[0].slice(3)
 }
 
+function getById(id) {
+  return document.getElementById(id);
+}
+
 function saveOptions(event) {
   chrome.storage.sync.get(
     { storedSettings: { global: defaultSettings } },
     (stored) => {
       const storedSettings = stored.storedSettings;
-      const thisSiteOnly = $(`#${thisSiteCheckId}`).prop('checked');
+      const thisSiteOnly = getById(thisSiteCheckId).checked;
       const thisSiteOnlyUpdated = (event.target.id == thisSiteCheckId);
       const switchedToThisSiteOnly = thisSiteOnlyUpdated && thisSiteOnly;
 
       const newSettings = {
-        styling: $('#selected-styling').val(),
-        backend: $('#selected-backend').val(),
-        threshold: $('#selected-threshold').val() / 100,
-        ranking: $('#selected-ranking-check').prop('checked'),
-        onlyTexts: $('#selected-onlytexts-check').prop('checked'),
-        enabled: $('#selected-enabled-check').prop('checked') || switchedToThisSiteOnly,
+        styling: getById('selected-styling').value,
+        backend: getById('selected-backend').value,
+        threshold: getById('selected-threshold').value / 100,
+        ranking: getById('selected-ranking-check').checked,
+        onlyTexts: getById('selected-onlytexts-check').checked,
+        enabled: getById('selected-enabled-check').checked || switchedToThisSiteOnly,
       };
 
       withTab((tab) => {        
@@ -57,17 +60,17 @@ function loadOptions() {
       const storedSettings = stored.storedSettings;
       withTab((tab) => {
         // use this site settings if defined
-        $('#selected-thissiteonly-check').prop(
-          'checked', (storedSettings[tabDomain(tab)] !== undefined));
+        getById('selected-thissiteonly-check').checked =
+            (storedSettings[tabDomain(tab)] !== undefined);
 
         const settings = storedSettings[tabDomain(tab)] || storedSettings.global;
 
-        $('#selected-styling').val(settings.styling);
-        $('#selected-backend').val(settings.backend);
-        $('#selected-threshold').val(Math.round(settings.threshold * 100));
-        $('#selected-ranking-check').prop('checked', settings.ranking);
-        $('#selected-onlytexts-check').prop('checked', settings.onlyTexts);
-        $('#selected-enabled-check').prop('checked', settings.enabled);
+        getById('selected-styling').value = settings.styling;
+        getById('selected-backend').value = settings.backend;
+        getById('selected-threshold').value = Math.round(settings.threshold * 100);
+        getById('selected-ranking-check').checked = settings.ranking;
+        getById('selected-onlytexts-check').checked = settings.onlyTexts;
+        getById('selected-enabled-check').checked = settings.enabled;
       });
     }
   );
@@ -85,16 +88,18 @@ function updateStatsText() {
           const percentageText = `${(100 * positives / tabStats.total).toFixed(1)}%`;
           text = `${percentageText} (${positives} / ${tabStats.total})`
         }
-        $('#positivity-score').text(text);
+        getById('positivity-score').innerText = text;
       });
     });
 }
 
-function onReady() {
+function main() {
   // options
   loadOptions();
   // add options listeners
-  $('.stored-options').on('change', saveOptions);
+  document
+      .querySelectorAll('.stored-options')
+      .forEach(el => el.onchange = saveOptions);
 
   // stats
   updateStatsText();
@@ -103,5 +108,5 @@ function onReady() {
     (changes) => { if (changes.stats != null) updateStatsText() });
 }
 
-$(onReady);
+main();
 
