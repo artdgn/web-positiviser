@@ -14,9 +14,9 @@ A browser extension that finds negative elements on the page and makes them less
     - Settings can be saved per site or globally.
     - An overall positivity score per page is displayed.
 
-## Using the extension
-I've started the process to submit it to Chrome and Firefox extension stores. However, it will take a while, as this is my first extension.
-In the meanwhile, it is possible to use it locally by cloning this repo and following the instructions below.
+## Installing the extension
+- [Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/negativity-balancer/)
+- Chrome is still in the process of approval. In the meanwhile, it is possible to use it locally by cloning this repo and following the instructions below.
 
 ## Running locally 
 
@@ -52,20 +52,29 @@ In the meanwhile, it is possible to use it locally by cloning this repo and foll
 - Docs: [Firefox docs](https://extensionworkshop.com/documentation/develop/testing-persistent-and-restart-features/)
 </details>
 
-### Sentiment scoring options:
+## Sentiment "Scoring" options:
 
-1. Browser side, rule based: Any of `(JS)` marked options in the "Scoring" drop-down.
+1. Use `Vader (JS)` or `AFINN (JS)` in the drop-down for browser side, rule based calculations.
 
-2. Python inference server:
-    <details><summary>Running in docker without local python</summary>
+2. For `FlairNLP (Py)` option a local python inference server needs to be running:
+    <details><summary>Running in docker (simplest if you have docker)</summary>
 
-    - `docker run -it --rm -p 8000:8000 artdgn/negativity-balancer`
+    Run interactively once (e.g to try it out):
+    > Start: `docker run -p 8000:8000 -it --rm artdgn/negativity-balancer`
+
+    > Stop: just Ctrl+C in the terminal where you're running it.
+
+    Run in detached and persistent mode (e.g. for actual usage):
+    > Start: `docker run -p 8000:8000 -dit --restart unless-stopped artdgn/negativity-balancer`
+
+    > Stop: `docker stop artdgn/negativity-balancer`.
     </details>
 
-    <details><summary>Local python</summary>
+    <details><summary>Local python (e.g. for development)</summary>
 
-    - To create local virtual environment and install (after cloning repo): `make install`
-    - Run server: `make server`
+    1. Clone repo.
+    2. `make install` to create local virtual environment and install dependencies in it. 
+    3. `make server` to run the server. 
     </details>
 
 ### Credits:
