@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import {
   scoredTextsClassName,
   scoredTextsValueAtt,
@@ -33,19 +32,19 @@ export class NegativityScorer {
     'jsafinn': JSNegativityAFINN,
   };
 
-  static updateAll(restyleCallback) {
+  static updateAll(restyleCallback) {    
     chrome.storage.sync.get(
       {
         storedSettings: { global: defaultSettings },
       },
       (stored) => {
-        this.settings_ = stored.storedSettings[domain()] || stored.storedSettings.global;        
+        this.settings_ = stored.storedSettings[domain()] || stored.storedSettings.global;
         this.updateAll_(restyleCallback);
       });
   }
 
   static updateAll_(restyleCallback) {
-    const allElements = this.qualifiedTextElements($(document));
+    const allElements = this.qualifiedTextElements(document.querySelectorAll("*"), false);
     this.removeAllValues_(allElements);
     if (
         (this.settings_.enabled) && 
@@ -70,38 +69,52 @@ export class NegativityScorer {
     }
   }
 
-  static qualifiedTextElements(elements) {
-    return $(elements).find(this.textNodesSelector).filter((i, element) => {
-      const text = extractElementText(element);
-      return countMatches(text, this.wordPattern) >= this.minNumWords;
+  static qualifyTextElement_(el) {
+    if ((el instanceof HTMLElement) && (el.matches(this.textNodesSelector))) {
+      const text = extractElementText(el);
+      return (countMatches(text, this.wordPattern) >= this.minNumWords);
+    } else return false;
+  }
+
+  static qualifiedTextElements(elements, withChildren = true) {
+    const filtered = new Set();
+    [...elements].forEach(parent => {
+      // check the element
+      if (this.qualifyTextElement_(parent)) filtered.add(parent);
+      if (withChildren) {
+        [...parent.querySelectorAll(this.textNodesSelector)]
+          .filter(el => this.qualifyTextElement_(el))
+          .map(el => filtered.add(el));
+      }
     });
+    return [...filtered];
   }
 
   static setNegativityValues_(elements, values) {
-    elements.each((i, el) => {
-      $(el).addClass(scoredTextsClassName);
-      $(el).attr(scoredTextsValueAtt, values[i]);
+    elements.forEach((el, i) => {
+      el.classList.add(scoredTextsClassName);
+      el.setAttribute(scoredTextsValueAtt, values[i]);
     });
   }
 
   static updateNegativityRanks_(elements) {
     const ranks = this.arrayDenseRanks_(this.negativityValues_(elements));
     const maxRank = Math.max.apply(null, ranks);
-    elements.each((i, el) => {
-      $(el).attr(scoredTextsRankAtt, ranks[i] / maxRank);
+    elements.forEach((el, i) => {
+      el.setAttribute(scoredTextsRankAtt, ranks[i] / maxRank);
     });
   }
 
   static removeAllValues_(elements) {
-    elements.each((i, el) => {
-      $(el).removeClass(scoredTextsClassName);
-      $(el).removeAttr(scoredTextsValueAtt);
-      $(el).removeAttr(scoredTextsRankAtt);
+    elements.forEach((el) => {
+      el.classList.remove(scoredTextsClassName);
+      el.removeAttribute(scoredTextsValueAtt);
+      el.removeAttribute(scoredTextsRankAtt);
     });
   }
 
   static negativityValues_(elements) {
-    return $.map(elements, (el) => parseFloat($(el).attr(scoredTextsValueAtt)));
+    return [...elements].map((el) => parseFloat(el.getAttribute(scoredTextsValueAtt)));
   }
 
   static arrayDenseRanks_(arr) {
