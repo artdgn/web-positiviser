@@ -4,5 +4,5 @@ export const defaultSettings = {
   threshold: 0.5,
   ranking: false,
   onlyTexts: false,
-  enabled: true
+  enabled: false,
 }

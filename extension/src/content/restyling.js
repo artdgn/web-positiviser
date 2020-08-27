@@ -13,6 +13,7 @@ export class Restyler {
   static eps = 0.001;
   static maxColor = 200;
   static minOpacity = 0.1;
+  static maxCombine = 3;
   static scoredTextsSelector = `.${scoredTextsClassName}`;
   // state
   static restyledPreviously_ = new Set();
@@ -52,6 +53,9 @@ export class Restyler {
       allParents.forEach((parent) => {
         const children = [...parent.querySelectorAll(this.scoredTextsSelector)];
 
+        // limit number of children that can be combined
+        if (children.length == 0 || children.length > this.maxCombine) return;
+
         // stop if some are visited
         if (children.some((el) => visitedChildren.has(el))) return;
 
@@ -62,8 +66,9 @@ export class Restyler {
         if ((numNegs == scores.length) || (numNegs == 0)) {         
           // there is not a mean() or even a sum() function
           // in all of JS or even its Math(!) module. Mind blown.
-          const meanScore = scores.reduce((a, b) => a + b, 0) / scores.length
-          this.updateElementStyle_(parent, meanScore);
+          // const combinedScore = scores.reduce((a, b) => a + b, 0) / scores.length
+          const combinedScore = scores.reduce((a, b) => Math.max(a, b), 0)
+          this.updateElementStyle_(parent, combinedScore);
           children.forEach((el) => visitedChildren.add(el));
           restyled.add(parent);
         }

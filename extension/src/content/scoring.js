@@ -81,7 +81,7 @@ export class NegativityScorer {
     [...elements].forEach(parent => {
       // check the element
       if (this.qualifyTextElement_(parent)) filtered.add(parent);
-      if (withChildren) {
+      if (withChildren && (parent instanceof HTMLElement)) {
         [...parent.querySelectorAll(this.textNodesSelector)]
           .filter(el => this.qualifyTextElement_(el))
           .map(el => filtered.add(el));
