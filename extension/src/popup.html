@@ -33,19 +33,34 @@ Allows user to adjust filtration settings.
       </div>
       <hr class="dotted divider">
 
-      <div class="option-row with-border" title="Increase to show more / Decrease for less">
-        <label for="selected-threshold">Negativity threshold</label>
-        <input class="slider stored-options with-border" id="selected-threshold" 
-          type="range" min="0" max="100" value="50" />
+      <div class="with-border"  title="Move left to show more / right for less">
+        <span class="header-row">Negativity threshold</span>
+        <div class="option-row">
+          <input class="slider stored-options with-border" id="selected-threshold" 
+            type="range" min="0" max="100" value="50" />
+
+            <label for="selected-ranking-check"
+              class="with-border" title="Toggle to use relative sensitivity&#013;(e.g. set threshold to 20% to show only 20%)">
+              <input class="stored-options" type="checkbox" id="selected-ranking-check" />
+              Ranks
+            </label>
+        </div>
       </div>
 
-      <div class="option-row with-border" title="Choose how to alter negative&#013;items' visibility">
-        <label for="selected-styling">Styling</label>
-        <select id="selected-styling" class="stored-options">
-          <option value="opacity">&nbspTransparency&nbsp</option>
-          <option value="remove">&nbspRemove&nbsp</option>
-          <option value="color">&nbspColors&nbsp</option>
-        </select>
+      <div class="with-border" title="Choose how to alter negative&#013;items' visibility">
+        <div class="option-row">
+          <span>Styling</span>  
+          <select id="selected-styling" class="stored-options">
+            <option value="opacity">&nbspTransparency&nbsp</option>
+            <option value="remove">&nbspRemove&nbsp</option>
+            <option value="color">&nbspColors&nbsp</option>
+          </select>  
+        </div>
+
+        <label class="hidden" for="selected-onlytexts-check option-row"  title="Toggle to restyle only texts elements&#013; themselves and not their highest container">
+          Only texts
+          <input class="stored-options" type="checkbox" id="selected-onlytexts-check" />
+        </label>
       </div>
 
       <div class="option-row with-border" title="How to calculate negativity values">
@@ -56,21 +71,6 @@ Allows user to adjust filtration settings.
           <option value="jsafinn">&nbspAFINN (JS)&nbsp</option>
         </select>
       </div>
-
-      <div class="option-row">
-        <label for="selected-ranking-check"
-          class="with-border" title="Toggle to use relative sensitivity&#013;(e.g. set threshold to 20% to show only 20%)">
-          <input class="stored-options" type="checkbox" id="selected-ranking-check" />
-          Ranks
-        </label>
-        
-        <label for="selected-onlytexts-check" 
-          class="with-border" title="Toggle to restyle only texts elements&#013; themselves and not their highest container">
-          <input class="stored-options" type="checkbox" id="selected-onlytexts-check" />
-          Only texts
-        </label>
-      </div>
-
       
     </div>
     <hr class="dotted divider">
