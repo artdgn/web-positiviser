@@ -16,7 +16,8 @@ A browser extension that finds negative elements on the page and makes them less
 
 ## Installing the extension
 - [Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/negativity-balancer/)
-- Chrome is still in the process of approval. In the meanwhile, it is possible to use it locally by cloning this repo and following the instructions below for "Using local extension".
+- [Download for Chrome](https://chrome.google.com/webstore/detail/negativity-balancer/ohcafpddkdjbmincmdemocckohpkceci)
+- Also possible to build and use from source by following instruction below for "Using local extension".
 
 ## Sentiment "Scoring" options:
 
