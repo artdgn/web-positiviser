@@ -89,7 +89,10 @@ export class PythonBackendNegativity extends BackendBase {
       chunkValues = await this.singleCallPromise_(chunkElements);
       if (chunkValues) {
         chunkCallback(chunkElements, chunkValues);
-      } else break;
+      } else {
+        chunkCallback([], []);
+        break;
+      }
       start += this.chunkSize;
     }
   }
@@ -110,16 +113,17 @@ export class PythonBackendNegativity extends BackendBase {
       }
     } catch (error) {
       console.log(error);
-      const instructionsLocation = 
+      if (!document.hidden) {  // only do this for active tab
+        const instructionsLocation = 
           'https://github.com/artdgn/negativity-balancer#sentiment-scoring-options';
-      const confirmPrompt = (
-          'Negativity-Balancer extension: local backend call failed.\n\n' + 
-          'Please switch to another scoring option, ' + 
-          'or ensure that a local scoring service is running.' + 
-          '\n\nPress "Cancel" to do nothing, or "OK" to open instructions page in a new tab.'
-          );
-      if (window.confirm(confirmPrompt)) window.open(instructionsLocation,'_blank');
-      
+        const confirmPrompt = (
+            'Negativity-Balancer extension: local backend call failed.\n\n' + 
+            'Please switch to another scoring option, ' + 
+            'or ensure that a local scoring service is running.' + 
+            '\n\nPress "Cancel" to do nothing, or "OK" to open instructions page in a new tab.'
+            );
+        if (window.confirm(confirmPrompt)) window.open(instructionsLocation, '_blank');      
+      }      
     }
   }
 }
