@@ -4,6 +4,10 @@ import { lexicon as vaderLexicon } from 'vader-sentiment/src/vader_lexicon.js';
 
 import { extractElementText } from './common.js';
 
+function clip(n) {
+  return Math.min(1, Math.max(0, n));
+}
+
 class BackendBase {
   static async processElements(elements, valuesCallback) {}
 
@@ -30,7 +34,11 @@ export class JSNegativityAFINN extends BackendBase {
       (text) => {
         const result = this.sentimentLib.analyze(text, this.extraLexicon);
         // return -1 * result.comparative; 
-        return -1 * result.score / result.calculation.length; 
+        if (!result.calculation.length) {
+          return 0.5;
+        } else {
+          return clip(-1 * result.score / result.calculation.length); 
+        }
       }
     );
     chunkCallback(elements, values);
@@ -64,9 +72,18 @@ export class JSNegativityVader extends BackendBase {
       (text) => {
         const result = VaderAnalyser.polarity_scores(text);
         // return (0.5 - 0.5 * result.compound); // compound score is in [-1, 1] range
-        return Math.min(1, Math.max(0, (0.5 + result.neg - result.pos))); 
-        // neg / neu / pos raw fields that are
-        // ratios of parts of text that fall in each category
+        const scoreNorm = Math.abs(result.neg) + Math.abs(result.pos);
+        if (!scoreNorm) {
+          return 0.5;
+        } else {
+          // discount neutral words becuase even a fully
+          // negative sentence is expected to contain mostly neutral words
+          const neutNorm = result.neu * 0.2;
+          const centeredScore = result.neg - result.pos;
+          return clip(0.5 + (centeredScore / (scoreNorm + neutNorm)));
+          // neg / neu / pos raw fields that are
+          // ratios of parts of text that fall in each category
+        }
       }
     );
     chunkCallback(elements, values);

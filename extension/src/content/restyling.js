@@ -11,7 +11,7 @@ export class Restyler {
   // constants
   static containerSelector = 'div,tr,nav,li';
   static eps = 0.001;
-  static maxColor = 200;
+  static maxColor = 255;
   static minOpacity = 0.1;
   static maxCombine = 3;
   static scoredTextsSelector = `.${scoredTextsClassName}`;
@@ -60,7 +60,7 @@ export class Restyler {
         if (children.some((el) => visitedChildren.has(el))) return;
 
         const scores = children.map((el) => parseFloat(el.getAttribute(scoreAttr)));
-        const numNegs = scores.filter((val) => val >= this.settings_.threshold).length;
+        const numNegs = scores.filter((val) => val > this.settings_.threshold).length;
 
         // only if all negatives or all positives (or only one child)
         if ((numNegs == scores.length) || (numNegs == 0)) {         
@@ -130,7 +130,7 @@ export class Restyler {
     this.storeRestoreValue_(element, 'opacity', element.style.opacity);
 
     const threshold = this.settings_.threshold;
-    if (this.settings_.styling == 'opacity' && score >= threshold) {
+    if (this.settings_.styling == 'opacity' && score > threshold) {
       const normScore = (score - threshold) / (1 - threshold + this.eps);
       const opacity = (1 - normScore * (1 - this.minOpacity)).toFixed(2);
       element.style.opacity = opacity;
@@ -156,7 +156,7 @@ export class Restyler {
     const threshold = this.settings_.threshold;
     if (this.settings_.styling == 'color') {
       let colorStr;
-      if (score >= threshold) {
+      if (score > threshold) {
         const colorVal = this.colorValue_(score - threshold, 1 - threshold);
         colorStr = `rgba(255, ${colorVal}, ${colorVal}, 0.4)`;
       } else {
@@ -178,7 +178,7 @@ export class Restyler {
   static updateElementVisibility_(element, score) {
     this.storeRestoreValue_(element, 'visibility', element.style.display);
 
-    if (this.settings_.styling == 'remove' && score >= this.settings_.threshold) {
+    if (this.settings_.styling == 'remove' && score > this.settings_.threshold) {
       element.style.display = 'none';
     } else this.resetOriginalVisility_(element);
   }
