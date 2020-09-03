@@ -8,15 +8,6 @@ function calulationsCallback() {
     { type: 'statsUpdate', stats: NegativityScorer.stats });
 }
 
-function recalculationNeeded(newStoredSettings, oldStoredSettings) {
-  const newSettings = newStoredSettings[domain()] || newStoredSettings.global;
-  const oldSettings = oldStoredSettings[domain()] || oldStoredSettings.global;
-  return (
-    (newSettings.backend != oldSettings.backend) ||
-    (newSettings.enabled != oldSettings.enabled)
-  );
-}
-
 // watch for dynamically added elements (infinite scroll / twitter load)
 // with mechanism to delay between mutation and calculation to allow 
 // for transitions to finish (again, twitter)
@@ -71,11 +62,18 @@ function main() {
   // initial run
   NegativityScorer.updateAll(calulationsCallback);
 
+  let oldSettings;
   // watch for option changes
   chrome.storage.onChanged.addListener((changes) => {
     if ('storedSettings' in changes) {
-      const settingsChange = changes.storedSettings;
-      if (recalculationNeeded(settingsChange.newValue, settingsChange.oldValue)) {
+      const newStoredSettings = changes.storedSettings.newValue
+      const newSettings = newStoredSettings[domain()] || newStoredSettings.global;
+      const recalcNeeded = (
+          !oldSettings ||
+          (newSettings.backend != oldSettings.backend) || 
+          (newSettings.enabled != oldSettings.enabled));
+      oldSettings = newSettings;
+      if (recalcNeeded) {
         NegativityScorer.updateAll(calulationsCallback);
       } else {
         Restyler.updateAll();

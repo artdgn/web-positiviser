@@ -33,7 +33,7 @@ export class NegativityScorer {
   };
 
   static updateAll(restyleCallback) {    
-    chrome.storage.sync.get(
+    chrome.storage.local.get(
       {
         storedSettings: { global: defaultSettings },
       },
@@ -51,7 +51,7 @@ export class NegativityScorer {
         (this.settings_.backend != 'off') && 
         (allElements.length >= this.minNumElements)
         ) {
-      console.log(`scoring ${allElements.length} text elements`);
+      // console.log(`scoring ${allElements.length} text elements`);
       // claculations need to be done
       this.backends[this.settings_.backend].processElements(
         allElements,

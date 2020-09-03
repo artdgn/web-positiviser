@@ -25,7 +25,7 @@ export class Restyler {
   static settings_ = {};
 
   static updateAll() {
-    chrome.storage.sync.get(
+    chrome.storage.local.get(
       { storedSettings: { global: defaultSettings } },
       (stored) => {        
         this.settings_ = stored.storedSettings[domain()] || stored.storedSettings.global;
@@ -83,7 +83,7 @@ export class Restyler {
         restyled.add(element);
       }
     });    
-    console.log(`altered ${restyled.size} elements`);    
+    // console.log(`altered ${restyled.size} elements`);    
 
     // reset previously restyled skipped this time
     // (e.g. due to different number of children / backend selection)
@@ -94,7 +94,7 @@ export class Restyler {
 
   static restoreRestyledPreviosly() {
     [...this.restyledPreviously_].forEach(el => this.resetElementStyle_(el));
-    console.log(`restored ${this.restyledPreviously_.size} elements`);
+    // console.log(`restored ${this.restyledPreviously_.size} elements`);
     this.restyledPreviously_ = new Set();
   }
  

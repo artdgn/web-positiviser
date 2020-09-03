@@ -20,7 +20,7 @@ function getById(id) {
 }
 
 function saveOptions(event) {
-  chrome.storage.sync.get(
+  chrome.storage.local.get(
     { storedSettings: { global: defaultSettings } },
     (stored) => {
       const storedSettings = stored.storedSettings;
@@ -47,14 +47,14 @@ function saveOptions(event) {
           const key = thisSiteOnly ? tabDomain(tab) : 'global';
           storedSettings[key] = newSettings;
         }
-        chrome.storage.sync.set({ storedSettings: storedSettings });
+        chrome.storage.local.set({ storedSettings: storedSettings });
         loadOptions(); // sync view in case view needs to change
       });
     });
 }
 
 function loadOptions() {
-  chrome.storage.sync.get(
+  chrome.storage.local.get(
     { storedSettings: { global: defaultSettings } },
     (stored) => {
       const storedSettings = stored.storedSettings;
