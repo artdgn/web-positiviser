@@ -1,4 +1,4 @@
-REPO_NAME=negativity-balancer
+REPO_NAME=web-positiviser
 VENV_ACTIVATE=. .venv/bin/activate
 PYTHON=.venv/bin/python
 DOCKER_TAG=artdgn/$(REPO_NAME)
@@ -54,5 +54,5 @@ tests:
 zip-source-code:
 	git clone -l . ./temp
 	rm -rf ./temp/.git
-	cd ./temp && zip -9 -rFS ../negativity-balancer-source.zip * && cd -
+	cd ./temp && zip -9 -rFS ../web-positiviser-source.zip * && cd -
 	rm -rf ./temp/

@@ -1,13 +1,13 @@
-![CI](https://github.com/artdgn/negativity-balancer/workflows/CI/badge.svg) ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/artdgn/negativity-balancer?label=dockerhub&logo=docker)
+![CI](https://github.com/artdgn/web-positiviser/workflows/CI/badge.svg) ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/artdgn/web-positiviser?label=dockerhub&logo=docker)
 
-# Negativity Balancer:
-Using sentiment analysis to reduce negative content visibility.
+# Web Positiviser:
+Make your web more positive by using sentiment analysis to reduce negative content visibility.
 
-![negativity-balancer.gif](https://artdgn.github.io/images/negativity-balancer.gif)
+![](https://artdgn.github.io/images/negativity-balancer.gif)
 
 ## What does this do?
 A browser extension that finds negative elements on the page and makes them less visible:
-- Negativity is calculated using either in browser rule based logic or an optional deep learning model running locally in the background.
+- Negativity is calculated using either in browser rule based logic or an **optional** deep learning model running locally in the background (in a docker container).
 - The user controls various options (negativity threshold, restyling options) via the options menu:
     - Visibility is reduced by adjusting transparency, or by hiding the element completely.
     - Colours can be added for inspection, or for examining the positivity.
@@ -15,8 +15,8 @@ A browser extension that finds negative elements on the page and makes them less
     - An overall positivity score per page is displayed.
 
 ## Installing the extension
-- [Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/negativity-balancer/)
-- [Download for Chrome](https://chrome.google.com/webstore/detail/negativity-balancer/ohcafpddkdjbmincmdemocckohpkceci)
+- [Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/web-positiviser/)
+- [Download for Chrome](https://chrome.google.com/webstore/detail/ohcafpddkdjbmincmdemocckohpkceci)
 - Also possible to build and use from source by following instruction below for "Using local extension".
 
 ## Sentiment "Scoring" options:
@@ -29,14 +29,14 @@ A browser extension that finds negative elements on the page and makes them less
     > Please wait a few seconds after starting to be ready to serve requests.
 
     Run interactively once (e.g to try it out):
-    - Start: `docker run -p 8000:8000 -it --rm artdgn/negativity-balancer`
+    - Start: `docker run -p 8000:8000 -it --rm artdgn/web-positiviser`
 
     - Stop: just Ctrl+C in the terminal where you're running it.
 
     Run in detached and persistent mode (e.g. for actual usage):
-    - Start: `docker run -p 8000:8000 -dit --restart unless-stopped --name negativity-balancer artdgn/negativity-balancer`
+    - Start: `docker run -p 8000:8000 -dit --restart unless-stopped --name web-positiviser artdgn/web-positiviser`
 
-    - Stop: `docker rm -f negativity-balancer`.
+    - Stop: `docker rm -f web-positiviser`.
 
     </details>
 
@@ -77,7 +77,7 @@ A browser extension that finds negative elements on the page and makes them less
     - Go to `about:config` and set `xpinstall.signatures.required` to False to be able to load a local extension.
     - Run `npm run-script build` to package the extensions into a zip file.
     - Go to `about:addons` -> "gear" icon -> "Install add-on from file.." -> 
-    Navigate to `/extension/` folder in this project -> choose `negativity-balancer.zip`.
+    Navigate to `/extension/` folder in this project -> choose `web-positiviser.zip`.
     - To update (on code changes): repeat previous two steps.
 - Docs: [Firefox docs](https://extensionworkshop.com/documentation/develop/testing-persistent-and-restart-features/)
 </details>

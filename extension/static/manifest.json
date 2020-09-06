@@ -1,11 +1,11 @@
 {
   "manifest_version": 2,
-  "name": "Negativity Balancer",
-  "version": "0.1.7",
-  "description": "Using sentiment analysis to reduce negative content visibility.",
+  "name": "Web Positiviser",
+  "version": "0.1.9",
+  "description": "Make your web more positive by using sentiment analysis to reduce negative content visibility.",
   "browser_action": {
     "default_icon": "images/icon.png",
-    "default_title": "Negativity Balancer",
+    "default_title": "Web Positiviser",
     "default_popup": "popup.html"
   },
   "icons": {"128": "images/icon.png" },

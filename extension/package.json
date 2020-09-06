@@ -1,11 +1,11 @@
 {
-  "name": "negativity-balancer",
+  "name": "web-positiviser",
   "version": "0.1.0",
   "description": "Using sentiment analysis to reduce bad news visibility.",
   "scripts": {
     "prebuild": "rm -rf dist .cache",
     "start": "NODE_ENV=development parcel watch src/background.js src/popup.html src/content-script.js --no-hmr",
-    "build": "NODE_ENV=production parcel build src/background.js src/popup.html src/content-script.js && cd dist && zip -9 -rFS ../negativity-balancer.zip * && cd -"
+    "build": "NODE_ENV=production parcel build src/background.js src/popup.html src/content-script.js && cd dist && zip -9 -rFS ../web-positiviser.zip * && cd -"
   },
   "keywords": [],
   "author": "",
