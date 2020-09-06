@@ -24,6 +24,7 @@ body {
   justify-content: space-between;
   flex-direction: row;
   margin-top: 0.5rem;
+  flex-flow: row wrap;
 }
 .header-row {
   display: flex;
@@ -31,6 +32,21 @@ body {
   font-size: 1.2rem;
   flex-direction: row;
   margin: 0rem;
+}
+#help-button {
+  border-radius: 1rem; 
+  font-weight: bold;
+  background-color: white;
+  display: block;
+}
+#help-text {
+  display: none;
+  font-size: 1.2rem;
+  background-color: white;
+  text-align: center;
+}
+#help-button:hover~#help-text {
+  display: block;
 }
 #threshold-text {
   font-weight: bold;

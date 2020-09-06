@@ -13,23 +13,26 @@ Allows user to adjust filtration settings.
   <div class="container">
     <div id="options">
       <div id="title">
-        <span>Negativity Balancer&nbsp</span>
+        <span title="Using sentiment analysis to reduce negative content visibility."
+          >Negativity Balancer&nbsp</span>
         <a href="https://github.com/artdgn/negativity-balancer/issues" target="_blank" 
           title="Please open a github issue for any complaints / suggestions.">
           <img src="../static/images/github.png" id="github">
         </a>
       </div>
       <div class="option-row">
+        <div class="with-border" id="help-button">?</div>
         <label for="selected-thissiteonly-check"
-          class="with-border" title="Apply settings for this site only (or globally).">
+          class="with-border" title="Apply settings for this site only. &#013;Unchecked will adjust default global settings.">
            <input class="stored-options" type="checkbox" id="selected-thissiteonly-check" />
            This site only&nbsp          
         </label>
         <label for="selected-enabled-check" 
-          class="with-border" title="Toggle extension on / off">
-          <input class="stored-options" title="Toggle extension off" type="checkbox" id="selected-enabled-check" />
+          class="with-border" title="Turn on / off">
+          <input class="stored-options" type="checkbox" id="selected-enabled-check" />
           On&nbsp
         </label>
+        <div id="help-text">Hover the mouse over a control area for a short tool-tip explanation.</div>
       </div>
       <hr class="dotted divider">
 
@@ -51,7 +54,7 @@ Allows user to adjust filtration settings.
         </div>
       </div>
 
-      <div class="with-border" title="Choose how to alter negative&#013;items' visibility">
+      <div class="with-border" title="Choose how to alter negative&#013;items' visibility.">
         <div class="option-row">
           <span>Styling</span>  
           <select id="selected-styling" class="stored-options">
@@ -68,7 +71,7 @@ Allows user to adjust filtration settings.
         </label>
       </div>
 
-      <div class="option-row with-border" title="How to calculate negativity values">
+      <div class="option-row with-border" title="Choose which algorithm is used to calculate negativity values">
         <label for="selected-backend">Scoring</label>
         <select id="selected-backend" class="stored-options">
           <option value="jsvader">&nbspVader (JS)&nbsp</option>
