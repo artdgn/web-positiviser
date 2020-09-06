@@ -2,7 +2,7 @@ export const defaultSettings = {
   styling: 'opacity',
   backend: 'jsvader',
   threshold: 0.5,
-  ranking: false,
+  ranking: true,
   onlyTexts: false,
   enabled: false,
 }

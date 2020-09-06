@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Negativity Balancer",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Using sentiment analysis to reduce negative content visibility.",
   "browser_action": {
     "default_icon": "images/icon.png",
