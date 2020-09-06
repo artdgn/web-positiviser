@@ -34,15 +34,19 @@ Allows user to adjust filtration settings.
       <hr class="dotted divider">
 
       <div class="with-border"  title="Move left to show more / right for less">
-        <span class="header-row">Negativity threshold</span>
+        <div class="header-row">
+          <span>Negativity threshold:</span>
+          <span id="threshold-text">50%</span>
+        </div>
         <div class="option-row">
           <input class="slider stored-options with-border" id="selected-threshold" 
             type="range" min="0" max="100" value="50" />
 
             <label for="selected-ranking-check"
-              class="with-border" title="Toggle to use relative sensitivity&#013;(e.g. set threshold to 20% to show only 20%)">
+              class="with-border" 
+              title="Toggle to use relative or absolute scores. &#013;Relative means a fixed percentage will always be restyled.">
               <input class="stored-options" type="checkbox" id="selected-ranking-check" />
-              Ranks
+              Relative
             </label>
         </div>
       </div>
@@ -57,7 +61,8 @@ Allows user to adjust filtration settings.
           </select>  
         </div>
 
-        <label class="hidden" for="selected-onlytexts-check option-row"  title="Toggle to restyle only texts elements&#013; themselves and not their highest container">
+        <label class="hidden" for="selected-onlytexts-check option-row"  
+            title="Toggle to restyle only texts elements&#013; themselves and not their highest container">
           Only texts
           <input class="stored-options" type="checkbox" id="selected-onlytexts-check" />
         </label>

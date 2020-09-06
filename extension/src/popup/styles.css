@@ -27,10 +27,13 @@ body {
 }
 .header-row {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   font-size: 1.2rem;
   flex-direction: row;
   margin: 0rem;
+}
+#threshold-text {
+  font-weight: bold;
 }
 .with-border{
   border: 0.1rem solid #c3c4c2;

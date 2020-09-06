@@ -64,10 +64,12 @@ function loadOptions() {
             (storedSettings[tabDomain(tab)] !== undefined);
 
         const settings = storedSettings[tabDomain(tab)] || storedSettings.global;
+        const threshold = Math.round(settings.threshold * 100);
 
         getById('selected-styling').value = settings.styling;
         getById('selected-backend').value = settings.backend;
-        getById('selected-threshold').value = Math.round(settings.threshold * 100);
+        getById('selected-threshold').value = threshold;
+        getById('threshold-text').innerText = `${threshold}%`;
         getById('selected-ranking-check').checked = settings.ranking;
         getById('selected-onlytexts-check').checked = settings.onlyTexts;
         getById('selected-enabled-check').checked = settings.enabled;
