@@ -132,7 +132,7 @@ export class PythonBackendNegativity extends BackendBase {
       console.log(error);
       if (!document.hidden) {  // only do this for active tab
         const instructionsLocation = 
-          'https://github.com/artdgn/web-positiviser#sentiment-scoring-options';
+          'https://github.com/artdgn/web-positiviser/blob/master/doc/python-backend.md';
         const confirmPrompt = (
             'Web-Positiviser extension: local backend call failed.\n\n' + 
             'Please switch to another scoring option, ' + 
