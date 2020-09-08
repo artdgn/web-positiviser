@@ -12,6 +12,10 @@ Allows user to adjust filtration settings.
 <body>
   <div class="container">
     <div id="options">
+      <div id="help">
+        <div id="help-button">?</div>
+        <div class="with-border" id="help-text">Hover the mouse over any control area for a short tool-tip explanation.</div>
+      </div>
       <div id="title">
         <span title="Using sentiment analysis to reduce negative content visibility."
           >Web Positiviser&nbsp</span>
@@ -21,7 +25,6 @@ Allows user to adjust filtration settings.
         </a>
       </div>
       <div class="option-row">
-        <div class="with-border" id="help-button">?</div>
         <label for="selected-thissiteonly-check"
           class="with-border" title="Apply settings for this site only. &#013;Unchecked will adjust default global settings.">
            <input class="stored-options" type="checkbox" id="selected-thissiteonly-check" />
@@ -31,8 +34,7 @@ Allows user to adjust filtration settings.
           class="with-border" title="Turn on / off">
           <input class="stored-options" type="checkbox" id="selected-enabled-check" />
           On&nbsp
-        </label>
-        <div id="help-text">Hover the mouse over a control area for a short tool-tip explanation.</div>
+        </label>        
       </div>
       <hr class="dotted divider">
 
