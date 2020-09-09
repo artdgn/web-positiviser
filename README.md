@@ -1,4 +1,5 @@
-![CI](https://github.com/artdgn/web-positiviser/workflows/CI/badge.svg) ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/artdgn/web-positiviser?label=dockerhub&logo=docker)
+![CI](https://github.com/artdgn/web-positiviser/workflows/CI/badge.svg) ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/artdgn/web-positiviser?label=dockerhub&logo=docker) <a href="https://chrome.google.com/webstore/detail/ohcafpddkdjbmincmdemocckohpkceci"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Chrome_icon_%28September_2014%29.svg" width="21"></a>
+<a href="https://addons.mozilla.org/en-US/firefox/addon/web-positiviser/"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a0/Firefox_logo%2C_2019.svg" width="24"></a>
 
 # Web Positiviser:
 Make your web more positive by using sentiment analysis to reduce negative content visibility.
@@ -15,9 +16,12 @@ A browser extension that finds negative elements on the page and makes them less
     - An overall positivity score per page is displayed.
 
 ## Installing the extension
-- [Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/web-positiviser/)
-- [Download for Chrome](https://chrome.google.com/webstore/detail/ohcafpddkdjbmincmdemocckohpkceci)
-- Also possible to build and use from source by following instruction below for "Using local extension".
+
+- <a href="https://chrome.google.com/webstore/detail/ohcafpddkdjbmincmdemocckohpkceci"> Download for Chrome <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Chrome_icon_%28September_2014%29.svg" width="21"></a>
+
+- <a href="https://addons.mozilla.org/en-US/firefox/addon/web-positiviser/"> Download for Firefox <img src="https://upload.wikimedia.org/wikipedia/commons/a/a0/Firefox_logo%2C_2019.svg" width="24"></a>
+
+- Or build and use from source by following instruction below for "Using local extension".
 
 ## Sentiment "Scoring" options:
 
